@@ -1,0 +1,21 @@
+{
+  "dockerfilePath": "Dockerfile",
+  "buildDir": "",
+  "containerPort": 8080,
+  "envParams": {
+    "MYSQL_ADDRESS": "",
+    "MYSQL_USERNAME": "",
+    "MYSQL_PASSWORD": "",
+    "REDIS_ADDRESS": "",
+    "REDIS_PASSWORD": ""
+  },
+  "cpu": 1,
+  "mem": 2,
+  "policyType": "cpu",
+  "policyThreshold": 60,
+  "customLogs": "stdout",
+  "initialDelaySeconds": 10,
+  "minNum": 1,
+  "maxNum": 50,
+  "remark": "友得云客房产小程序服务端"
+} 
