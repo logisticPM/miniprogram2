@@ -1,5 +1,5 @@
 {
-  "dockerfilePath": "Dockerfile.simple",
+  "dockerfilePath": "Dockerfile",
   "buildDir": "",
   "containerPort": 8080,
   "envParams": {
