@@ -3,7 +3,7 @@
   "buildDir": "",
   "containerPort": 8080,
   "envParams": {
-    "MYSQL_ADDRESS": "localhost:3306/udyk_community",
+    "MYSQL_ADDRESS": "10.48.100.162:3306",
     "MYSQL_USERNAME": "root",
     "MYSQL_PASSWORD": "uNvv89FG",
     "REDIS_ADDRESS": "localhost",
