@@ -5,27 +5,20 @@
 
 # 编辑器配置
 .vscode
+.idea
 *.code-workspace
 
-# 依赖和构建产物
-**/node_modules
-**/target
-**/dist
-**/build
-
-# 日志和临时文件
-**/logs
-**/*.log
-**/temp
-
-# 文档和Excel文件
+# 非必要文件
 *.md
-*.xlsx
-*.docx
-*.pdf
+*.log
+logs/
 
-# 非server目录的代码
-/app/weapp
-/app/miniprogram
-/app/panel
-/app/cloudfunctions 
+# 前端代码和其他不相关目录
+app/weapp/**
+app/miniprogram/**
+app/panel/**
+app/cloudfunctions/**
+
+# Maven构建目录
+**/target/
+!app/server/target/*.jar 

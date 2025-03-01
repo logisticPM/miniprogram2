@@ -1,13 +1,46 @@
+# 使用官方 maven 镜像作为构建环境
+FROM maven:3.8.8-openjdk-17 AS builder
+
+# 设置工作目录
+WORKDIR /app
+
+# 优先复制 pom.xml 利用缓存
+COPY app/server/pom.xml pom.xml
+COPY app/server/.mvn ./.mvn
+COPY app/server/mvnw mvnw
+COPY app/server/mvnw.cmd mvnw.cmd
+
+# 下载依赖
+RUN chmod +x mvnw && ./mvnw dependency:go-offline -B
+
+# 复制源代码
+COPY app/server/src ./src
+
+# 构建项目
+RUN ./mvnw package -DskipTests
+
+# 运行环境阶段
 FROM eclipse-temurin:17-jre
+
+# 安装 curl 用于健康检查
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# 复制预先构建好的jar文件
-# 注意：使用此Dockerfile前，需要在本地先运行 cd app/server && ./mvnw clean package -DskipTests
-COPY app/server/target/*.jar /app/app.jar
+# 从构建阶段复制 jar 包
+COPY --from=builder /app/target/*.jar app.jar
 
+# 设置环境变量
 ENV TZ=Asia/Shanghai
+ENV JAVA_OPTS=""
+ENV PORT=8080
 
-EXPOSE 8080
+# 暴露端口
+EXPOSE ${PORT}
 
-ENTRYPOINT ["java", "-jar", "/app/app.jar"] 
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:${PORT}/api/health || exit 1
+
+# 启动命令
+ENTRYPOINT java ${JAVA_OPTS} -jar app.jar --server.port=${PORT} 
