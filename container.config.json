@@ -1,0 +1,31 @@
+{
+  "dockerfilePath": "Dockerfile",
+  "buildDir": "",
+  "containerPort": 8080,
+  "envParams": {
+    "MYSQL_ADDRESS": "10.48.100.162:3306",
+    "MYSQL_USERNAME": "root",
+    "MYSQL_PASSWORD": "uNvv89FG",
+    "REDIS_ADDRESS": "localhost",
+    "REDIS_PASSWORD": ""
+  },
+  "cpu": 1,
+  "mem": 2,
+  "policyType": "cpu",
+  "policyThreshold": 60,
+  "customLogs": "stdout",
+  "initialDelaySeconds": 30,
+  "minNum": 1,
+  "maxNum": 50,
+  "remark": "友得云客房产小程序服务端",
+  "healthCheckConfig": {
+    "livenessConfig": {
+      "path": "/actuator/health/liveness",
+      "port": 8080
+    },
+    "readinessConfig": {
+      "path": "/actuator/health/readiness",
+      "port": 8080
+    }
+  }
+} 
