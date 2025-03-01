@@ -1,11 +1,11 @@
-package com.udeve.utils.file;
+package com.smartre.utils.file;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "udyk")
-public class UdykUtil {
+@ConfigurationProperties(prefix = "shdc")
+public class ShdcUtil {
 
     public static String uploadDir;
 
@@ -16,7 +16,7 @@ public class UdykUtil {
     }
 
     public void setUploadDir(String uploadDir) {
-        UdykUtil.uploadDir = uploadDir;
+        ShdcUtil.uploadDir = uploadDir;
     }
 
     public static String getFilestorePath() {
@@ -24,6 +24,6 @@ public class UdykUtil {
     }
 
     public void setFilestorePath(String filestorePath) {
-        UdykUtil.filestorePath = filestorePath;
+        ShdcUtil.filestorePath = filestorePath;
     }
-}
+} 
