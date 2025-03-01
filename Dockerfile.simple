@@ -1,0 +1,13 @@
+FROM eclipse-temurin:17-jre
+
+WORKDIR /app
+
+# 复制预先构建好的jar文件
+# 注意：使用此Dockerfile前，需要在本地先运行 cd app/server && ./mvnw clean package -DskipTests
+COPY app/server/target/*.jar /app/app.jar
+
+ENV TZ=Asia/Shanghai
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "/app/app.jar"] 
