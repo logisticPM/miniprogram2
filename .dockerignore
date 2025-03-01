@@ -1,4 +1,4 @@
-# 版本控制
+# 版本控制文件
 .git
 .github
 .gitignore
@@ -6,19 +6,16 @@
 # 编辑器配置
 .vscode
 .idea
-*.code-workspace
 
-# 非必要文件
+# 前端和不相关目录
+app/weapp
+app/miniprogram
+app/panel
+app/cloudfunctions
+
+# 忽略所有文档文件
 *.md
-*.log
-logs/
 
-# 前端代码和其他不相关目录
-app/weapp/**
-app/miniprogram/**
-app/panel/**
-app/cloudfunctions/**
-
-# Maven构建目录
+# 已经构建好的文件
 **/target/
-!app/server/target/*.jar 
+**/node_modules/ 
