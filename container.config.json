@@ -17,7 +17,7 @@
   "initialDelaySeconds": 30,
   "minNum": 1,
   "maxNum": 50,
-  "remark": "友得云客房产小程序服务端",
+  "remark": "智慧地产房产小程序服务端",
   "healthCheckConfig": {
     "livenessConfig": {
       "path": "/actuator/health/liveness",
