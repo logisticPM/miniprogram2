@@ -37,6 +37,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
+        <!-- Spring Boot Actuator 用于健康检查 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
         <!-- Sa-Token 整合 Redis （使用 jdk 默认序列化方式） -->
         <dependency>
             <groupId>cn.dev33</groupId>
