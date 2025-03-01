@@ -1,0 +1,51 @@
+<!--pages/tonglu/houses/index.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="title">房源列表</view>
+  </view>
+
+  <view class="filter-section">
+    <view class="filter-title">筛选条件</view>
+    <view class="filter-options">
+      <view class="filter-group">
+        <view class="filter-label">楼号：</view>
+        <view class="filter-buttons">
+          <view class="filter-btn {{buildingFilter === '' ? 'active' : ''}}" bindtap="clearFilter">全部</view>
+          <view class="filter-btn {{buildingFilter === '1' ? 'active' : ''}}" bindtap="filterByBuilding" data-building="1">1栋</view>
+          <view class="filter-btn {{buildingFilter === '2' ? 'active' : ''}}" bindtap="filterByBuilding" data-building="2">2栋</view>
+          <view class="filter-btn {{buildingFilter === '3' ? 'active' : ''}}" bindtap="filterByBuilding" data-building="3">3栋</view>
+        </view>
+      </view>
+      <view class="filter-group">
+        <view class="filter-label">状态：</view>
+        <view class="filter-buttons">
+          <view class="filter-btn {{statusFilter === null ? 'active' : ''}}" bindtap="clearFilter">全部</view>
+          <view class="filter-btn {{statusFilter === 0 ? 'active' : ''}}" bindtap="filterByStatus" data-status="0">可抢</view>
+          <view class="filter-btn {{statusFilter === 1 ? 'active' : ''}}" bindtap="filterByStatus" data-status="1">已抢</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">
+    <view class="loading-text">加载中...</view>
+  </view>
+
+  <view class="house-list" wx:else>
+    <block wx:if="{{houses.length > 0}}">
+      <view class="house-item" wx:for="{{houses}}" wx:key="id" bindtap="viewHouseDetail" data-id="{{item.id}}">
+        <view class="house-name">{{item.buildingNumber}}栋{{item.unitNumber}}单元{{item.roomNumber}}室</view>
+        <view class="house-info">
+          <view class="house-area">面积：{{item.area}}㎡</view>
+          <view class="house-price">价格：{{item.price}}万元</view>
+        </view>
+        <view class="house-status">
+          <text class="status-tag status-{{item.status}}">{{item.status === 0 ? '可抢' : '已抢'}}</text>
+        </view>
+      </view>
+    </block>
+    <view class="empty-tip" wx:else>
+      <view class="empty-text">暂无符合条件的房源</view>
+    </view>
+  </view>
+</view>

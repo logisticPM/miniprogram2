@@ -1,0 +1,44 @@
+<view class="container">
+  <view class="header">
+    <view class="title">抢房活动</view>
+  </view>
+
+  <view class="user-section" wx:if="{{!isLoggedIn}}">
+    <view class="login-tip">您尚未登录，请先登录</view>
+    <button class="login-btn" bindtap="goToLogin">立即登录</button>
+  </view>
+
+  <view class="tabs">
+    <view class="tab-item {{activeTab === index ? 'active' : ''}}" 
+          wx:for="{{tabs}}" 
+          wx:key="index" 
+          bindtap="switchTab" 
+          data-index="{{index}}">
+      {{item}}
+    </view>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">
+    <view class="loading-text">加载中...</view>
+  </view>
+
+  <view class="activity-list" wx:else>
+    <block wx:if="{{filteredActivities.length > 0}}">
+      <view class="activity-item" wx:for="{{filteredActivities}}" wx:key="id" bindtap="goToActivityDetail" data-id="{{item.id}}">
+        <view class="activity-name">{{item.name}}</view>
+        <view class="activity-time">
+          <text>开始时间：{{item.startTimeFormatted}}</text>
+          <text>结束时间：{{item.endTimeFormatted}}</text>
+        </view>
+        <view class="activity-desc">{{item.description}}</view>
+        <view class="activity-status">
+          <text class="status-tag status-{{item.status}}">{{item.status === 0 ? '未开始' : item.status === 1 ? '进行中' : '已结束'}}</text>
+        </view>
+        <view class="activity-arrow">></view>
+      </view>
+    </block>
+    <view class="empty-tip" wx:else>
+      <view class="empty-text">暂无{{tabs[activeTab]}}</view>
+    </view>
+  </view>
+</view> 
