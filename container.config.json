@@ -1,0 +1,21 @@
+{
+  "dockerfilePath": "Dockerfile",
+  "buildDir": "",
+  "containerPort": 8080,
+  "envParams": {
+    "MYSQL_ADDRESS": "localhost:3306/udyk_community",
+    "MYSQL_USERNAME": "root",
+    "MYSQL_PASSWORD": "uNvv89FG",
+    "REDIS_ADDRESS": "localhost",
+    "REDIS_PASSWORD": ""
+  },
+  "cpu": 1,
+  "mem": 2,
+  "policyType": "cpu",
+  "policyThreshold": 60,
+  "customLogs": "stdout",
+  "initialDelaySeconds": 10,
+  "minNum": 1,
+  "maxNum": 50,
+  "remark": "友得云客房产小程序服务端"
+} 
