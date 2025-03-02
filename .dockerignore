@@ -16,4 +16,17 @@ app/cloudfunctions
 # 缓存和构建文件
 **/target/
 **/node_modules/
-**/.DS_Store 
+**/.DS_Store
+
+# 排除所有文件，然后仅包含需要的文件
+*
+!app/server/pom.xml
+!app/server/src
+
+# 在server目录中也排除不需要的文件
+app/server/target
+app/server/.idea
+app/server/.vscode
+app/server/.git
+app/server/logs
+app/server/*.log 
