@@ -1,7 +1,7 @@
 ﻿# 基于微信官方示例优化的Dockerfile
 # 针对微信云托管环境优化的构建配置
 # 更新日期: 2025-03-02
-# 版本: 1.0.12 - 使用阿里云个人镜像仓库
+# 版本: 1.0.13 - 修复Java文件编码问题
 # 注意: 构建前请确保已经将基础镜像推送到阿里云仓库：
 # docker pull maven:3.8.6-eclipse-temurin-17-alpine
 # docker pull eclipse-temurin:17-jre-alpine
@@ -37,7 +37,7 @@ COPY server /build/
 
 # 创建一个健康检查控制器，确保/api/health端点可用
 RUN mkdir -p /build/src/main/java/com/udeve/controller && \
-    echo 'package com.udeve.controller;\n\nimport org.springframework.web.bind.annotation.GetMapping;\nimport org.springframework.web.bind.annotation.RestController;\n\n@RestController\npublic class HealthController {\n\n    @GetMapping("/api/health")\n    public String health() {\n        return "{\"status\":\"UP\"}";\n    }\n}' > /build/src/main/java/com/udeve/controller/HealthController.java
+    printf 'package com.udeve.controller;\n\nimport org.springframework.web.bind.annotation.GetMapping;\nimport org.springframework.web.bind.annotation.RestController;\n\n@RestController\npublic class HealthController {\n\n    @GetMapping("/api/health")\n    public String health() {\n        return "{\"status\":\"UP\"}";\n    }\n}\n' > /build/src/main/java/com/udeve/controller/HealthController.java
 
 # 构建应用
 RUN mvn package -T 2C -DskipTests -Dmaven.test.skip=true
