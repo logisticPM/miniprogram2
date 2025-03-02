@@ -1,14 +1,14 @@
 {
   "dockerfilePath": "Dockerfile",
   "buildDir": "",
-  "containerPort": 8080,
+  "containerPort": 80,
   "envParams": {
     "MYSQL_ADDRESS": "${MYSQL_ADDRESS}",
     "MYSQL_USERNAME": "${MYSQL_USERNAME}",
     "MYSQL_PASSWORD": "${MYSQL_PASSWORD}",
     "REDIS_ADDRESS": "${REDIS_ADDRESS}",
     "REDIS_PASSWORD": "${REDIS_PASSWORD}",
-    "PORT": "8080"
+    "PORT": "80"
   },
   "cpu": 1,
   "mem": 2,
@@ -22,11 +22,11 @@
   "healthCheckConfig": {
     "livenessConfig": {
       "path": "/api/health",
-      "port": 8080
+      "port": 80
     },
     "readinessConfig": {
       "path": "/api/health",
-      "port": 8080
+      "port": 80
     }
   }
 }
