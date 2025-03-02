@@ -9,7 +9,7 @@ FROM maven:3.8.6-openjdk-8
 # 指定工作目录
 WORKDIR /app
 
-# 创建settings.xml以使用阿里云Maven镜像源加速依赖下载
+# 创建settings.xml以使用阿里云Maven镜像源加速依赖下载1
 RUN mkdir -p /root/.m2 \
     && echo '<?xml version="1.0" encoding="UTF-8"?>\
     <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" \
