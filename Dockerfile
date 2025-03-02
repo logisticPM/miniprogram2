@@ -24,6 +24,11 @@ RUN mkdir -p /root/.m2 \
     </mirrors>\
     </settings>' > /root/.m2/settings.xml
 
+# 创建微信云托管所需的cert目录和初始化脚本
+RUN mkdir -p /app/cert \
+    && echo '#!/bin/sh\necho "Initializing environment..."\nexit 0' > /app/cert/initenv.sh \
+    && chmod +x /app/cert/initenv.sh
+
 # 复制整个项目到容器中（依赖.dockerignore排除不必要文件）
 COPY . .
 
