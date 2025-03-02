@@ -1,5 +1,6 @@
 ﻿# 基于微信官方示例优化的Dockerfile
 # 针对微信云托管环境优化的构建配置
+# 更新日期: 2025-03-02
 
 # 选择基础镜像(Maven+JDK8)
 FROM maven:3.6.0-jdk-8-slim
@@ -45,5 +46,5 @@ EXPOSE ${PORT}
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:${PORT}/api/health || exit 1
 
-# 构建并启动应用（单步执行以减少层数）
-CMD ["sh", "-c", "cd app/server && mvn package -DskipTests && java -Duser.timezone=Asia/Shanghai -jar target/*.jar --server.port=${PORT}"]
+# 构建并启动应用（单步执行以减少层数，添加Maven性能优化参数）
+CMD ["sh", "-c", "cd app/server && mvn package -T 2C -DskipTests -Dmaven.test.skip=true && java -Duser.timezone=Asia/Shanghai -Xms256m -Xmx512m -jar target/*.jar --server.port=${PORT}"]
