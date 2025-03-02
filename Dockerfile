@@ -1,13 +1,17 @@
 ﻿# 基于微信官方示例优化的Dockerfile
 # 针对微信云托管环境优化的构建配置
 # 更新日期: 2025-03-02
-# 版本: 1.0.10 - 使用阿里云官方OpenJDK镜像
-# 注意: 建议在构建前预先拉取所需镜像:
-# docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/maven:3.8.6-openjdk-17-slim
-# docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/openjdk:17-jre-alpine
+# 版本: 1.0.12 - 使用阿里云个人镜像仓库
+# 注意: 构建前请确保已经将基础镜像推送到阿里云仓库：
+# docker pull maven:3.8.6-eclipse-temurin-17-alpine
+# docker pull eclipse-temurin:17-jre-alpine
+# docker tag maven:3.8.6-eclipse-temurin-17-alpine crpi-mn807cz6acoglkss.cn-hangzhou.personal.cr.aliyuncs.com/miniprogram1/miniprogra:maven-3.8.6-alpine
+# docker tag eclipse-temurin:17-jre-alpine crpi-mn807cz6acoglkss.cn-hangzhou.personal.cr.aliyuncs.com/miniprogram1/miniprogra:jre-17-alpine
+# docker push crpi-mn807cz6acoglkss.cn-hangzhou.personal.cr.aliyuncs.com/miniprogram1/miniprogra:maven-3.8.6-alpine
+# docker push crpi-mn807cz6acoglkss.cn-hangzhou.personal.cr.aliyuncs.com/miniprogram1/miniprogra:jre-17-alpine
 
 # 第一阶段：构建阶段
-FROM registry.cn-hangzhou.aliyuncs.com/google_containers/maven:3.8.6-openjdk-17-slim AS builder
+FROM crpi-mn807cz6acoglkss.cn-hangzhou.personal.cr.aliyuncs.com/miniprogram1/miniprogra:maven-3.8.6-alpine AS builder
 
 # 指定工作目录
 WORKDIR /build
@@ -43,7 +47,7 @@ RUN mkdir -p /build/static && \
     echo '{"status":"UP"}' > /build/static/health.json
 
 # 第二阶段：运行阶段
-FROM registry.cn-hangzhou.aliyuncs.com/google_containers/openjdk:17-jre-alpine
+FROM crpi-mn807cz6acoglkss.cn-hangzhou.personal.cr.aliyuncs.com/miniprogram1/miniprogra:jre-17-alpine
 
 # 指定工作目录
 WORKDIR /app
