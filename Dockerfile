@@ -26,9 +26,8 @@ RUN mkdir -p /root/.m2 \
 # 复制整个项目到容器中（依赖.dockerignore排除不必要文件）
 COPY . .
 
-# 使用腾讯云镜像源安装必要工具并优化空间使用
-RUN sed -i 's/deb.debian.org/mirrors.cloud.tencent.com/g' /etc/apt/sources.list \
-    && apt-get update \
+# 安装必要工具（使用默认源而不是腾讯云镜像，避免Debian Stretch兼容问题）
+RUN apt-get update \
     && apt-get install -y --no-install-recommends tzdata curl \
     && rm -rf /var/lib/apt/lists/*
 
