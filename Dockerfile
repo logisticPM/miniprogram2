@@ -1,15 +1,13 @@
 ﻿# 基于微信官方示例优化的Dockerfile
 # 针对微信云托管环境优化的构建配置
 # 更新日期: 2025-03-02
-# 版本: 1.0.9 - 优化基础镜像和构建过程
-# 注意: 如遇网络问题，请在Docker daemon配置中添加阿里云镜像加速器:
-# 在 /etc/docker/daemon.json 中添加:
-# {
-#   "registry-mirrors": ["https://fci2c6vp.mirror.aliyuncs.com"]
-# }
+# 版本: 1.0.10 - 使用阿里云官方OpenJDK镜像
+# 注意: 建议在构建前预先拉取所需镜像:
+# docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/maven:3.8.6-openjdk-17-slim
+# docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/openjdk:17-jre-alpine
 
 # 第一阶段：构建阶段
-FROM maven:3.8.6-openjdk-17-slim AS builder
+FROM registry.cn-hangzhou.aliyuncs.com/google_containers/maven:3.8.6-openjdk-17-slim AS builder
 
 # 指定工作目录
 WORKDIR /build
@@ -45,7 +43,7 @@ RUN mkdir -p /build/static && \
     echo '{"status":"UP"}' > /build/static/health.json
 
 # 第二阶段：运行阶段
-FROM eclipse-temurin:17-jre-jammy-minimal
+FROM registry.cn-hangzhou.aliyuncs.com/google_containers/openjdk:17-jre-alpine
 
 # 指定工作目录
 WORKDIR /app
@@ -62,9 +60,8 @@ COPY --from=builder /build/target/*.jar /app/app.jar
 COPY --from=builder /build/static/health.json /app/health.json
 
 # 安装必要工具
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends tzdata curl netcat-openbsd && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache tzdata curl netcat-openbsd && \
+    rm -rf /var/cache/apk/*
 
 # 设置时区为上海
 RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
