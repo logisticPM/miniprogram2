@@ -1,14 +1,14 @@
 ﻿{
   "dockerfilePath": "Dockerfile",
   "buildDir": "",
-  "containerPort": 80,
+  "containerPort": 8080,
   "envParams": {
     "MYSQL_ADDRESS": "${MYSQL_ADDRESS}",
     "MYSQL_USERNAME": "${MYSQL_USERNAME}",
     "MYSQL_PASSWORD": "${MYSQL_PASSWORD}",
     "REDIS_ADDRESS": "${REDIS_ADDRESS}",
     "REDIS_PASSWORD": "${REDIS_PASSWORD}",
-    "PORT": "80"
+    "PORT": "8080"
   },
   "cpu": 1,
   "mem": 2,
@@ -18,15 +18,15 @@
   "initialDelaySeconds": 60,
   "minNum": 1,
   "maxNum": 50,
-  "remark": "鏅烘収鍦颁骇鎴夸骇灏忕▼搴忔湇鍔＄",
+  "remark": "智慧地产房产小程序服务端",
   "healthCheckConfig": {
     "livenessConfig": {
       "path": "/api/health",
-      "port": 80
+      "port": 8080
     },
     "readinessConfig": {
       "path": "/api/health",
-      "port": 80
+      "port": 8080
     }
   }
 }

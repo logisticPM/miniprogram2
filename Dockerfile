@@ -1,7 +1,7 @@
 ﻿# 基于微信官方示例优化的Dockerfile
 # 针对微信云托管环境优化的构建配置
 # 更新日期: 2025-03-02
-# 版本: 1.0.1 - 修复生命周期钩子问题
+# 版本: 1.0.3 - 修复容器启动和生命周期钩子问题
 
 # 选择更新的基础镜像(最新Maven+JDK8)
 FROM maven:3.8.6-openjdk-8
@@ -25,13 +25,18 @@ RUN mkdir -p /root/.m2 \
     </mirrors>\
     </settings>' > /root/.m2/settings.xml
 
-# 创建微信云托管所需的cert目录和初始化脚本
+# 创建微信云托管所需的cert目录和初始化脚本（根目录和server目录都创建）
 RUN mkdir -p /app/cert \
-    && echo '#!/bin/sh\necho "Initializing environment..."\nexit 0' > /app/cert/initenv.sh \
+    && echo '#!/bin/sh\necho "Initializing environment at root level..."\nexit 0' > /app/cert/initenv.sh \
     && chmod +x /app/cert/initenv.sh
 
 # 复制整个项目到容器中（依赖.dockerignore排除不必要文件）
 COPY . .
+
+# 确保server目录下也有生命周期钩子脚本
+RUN mkdir -p /app/server/cert \
+    && echo '#!/bin/sh\necho "Initializing environment in server directory..."\nexit 0' > /app/server/cert/initenv.sh \
+    && chmod +x /app/server/cert/initenv.sh
 
 # 安装必要工具
 RUN apt-get update \
@@ -43,7 +48,7 @@ RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo "Asia/Shanghai" > /etc/timezone
 
 # 设置端口环境变量（匹配container.config.json）
-ENV PORT=80
+ENV PORT=8080
 
 # 暴露端口
 EXPOSE ${PORT}
@@ -53,4 +58,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:${PORT}/api/health || exit 1
 
 # 构建并启动应用（单步执行以减少层数，添加Maven性能优化参数）
-CMD ["sh", "-c", "cd app/server && mvn package -T 2C -DskipTests -Dmaven.test.skip=true && java -Duser.timezone=Asia/Shanghai -Xms256m -Xmx512m -jar target/*.jar --server.port=${PORT}"]
+CMD ["sh", "-c", "cd server && mvn package -T 2C -DskipTests -Dmaven.test.skip=true && java -Duser.timezone=Asia/Shanghai -Xms256m -Xmx512m -jar target/*.jar --server.port=${PORT}"]
