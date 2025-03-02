@@ -27,8 +27,11 @@ RUN mkdir -p /root/.m2 \
 # 复制整个项目到容器中（依赖.dockerignore排除不必要文件）
 COPY . .
 
-# 安装必要工具（使用默认源而不是腾讯云镜像，避免Debian Stretch兼容问题）
-RUN apt-get update \
+# 将APT源更新为Debian Stretch归档地址
+RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /etc/apt/sources.list \
+    && sed -i 's|http://security.debian.org/debian-security|http://archive.debian.org/debian-security|g' /etc/apt/sources.list \
+    && echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid \
+    && apt-get update \
     && apt-get install -y --no-install-recommends tzdata curl \
     && rm -rf /var/lib/apt/lists/*
 
