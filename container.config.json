@@ -15,18 +15,24 @@
   "policyType": "cpu",
   "policyThreshold": 60,
   "customLogs": "stdout",
-  "initialDelaySeconds": 60,
+  "initialDelaySeconds": 120,
   "minNum": 1,
   "maxNum": 50,
   "remark": "智慧地产房产小程序服务端",
   "healthCheckConfig": {
     "livenessConfig": {
       "path": "/api/health",
-      "port": 8080
+      "port": 8080,
+      "initialDelaySeconds": 120,
+      "timeoutSeconds": 10,
+      "periodSeconds": 30
     },
     "readinessConfig": {
       "path": "/api/health",
-      "port": 8080
+      "port": 8080,
+      "initialDelaySeconds": 90,
+      "timeoutSeconds": 10,
+      "periodSeconds": 30
     }
   }
 }

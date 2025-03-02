@@ -1,7 +1,7 @@
 ﻿# 基于微信官方示例优化的Dockerfile
 # 针对微信云托管环境优化的构建配置
 # 更新日期: 2025-03-02
-# 版本: 1.0.3 - 修复容器启动和生命周期钩子问题
+# 版本: 1.0.4 - 修复健康检查和端口监听问题
 
 # 选择更新的基础镜像(最新Maven+JDK8)
 FROM maven:3.8.6-openjdk-8
@@ -9,7 +9,7 @@ FROM maven:3.8.6-openjdk-8
 # 指定工作目录
 WORKDIR /app
 
-# 创建settings.xml以使用阿里云Maven镜像源加速依赖下载1
+# 创建settings.xml以使用阿里云Maven镜像源加速依赖下载
 RUN mkdir -p /root/.m2 \
     && echo '<?xml version="1.0" encoding="UTF-8"?>\
     <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" \
@@ -53,9 +53,14 @@ ENV PORT=8080
 # 暴露端口
 EXPOSE ${PORT}
 
-# 添加健康检查，确保容器正常运行
-HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+# 创建健康检查端点
+RUN mkdir -p /app/server/src/main/java/com/udeve/controller && \
+    echo 'package com.udeve.controller;\n\nimport org.springframework.web.bind.annotation.GetMapping;\nimport org.springframework.web.bind.annotation.RestController;\n\n@RestController\npublic class HealthController {\n\n    @GetMapping("/api/health")\n    public String health() {\n        return "{\"status\":\"UP\"}";\n    }\n}' > /app/server/src/main/java/com/udeve/controller/HealthController.java
+
+# 添加健康检查，确保容器正常运行（增加超时时间）
+HEALTHCHECK --interval=30s --timeout=15s --start-period=90s --retries=3 \
     CMD curl -f http://localhost:${PORT}/api/health || exit 1
 
 # 构建并启动应用（单步执行以减少层数，添加Maven性能优化参数）
-CMD ["sh", "-c", "cd server && mvn package -T 2C -DskipTests -Dmaven.test.skip=true && java -Duser.timezone=Asia/Shanghai -Xms256m -Xmx512m -jar target/*.jar --server.port=${PORT}"]
+# 明确设置server.port参数以确保应用监听在正确的端口上
+CMD ["sh", "-c", "cd server && mvn package -T 2C -DskipTests -Dmaven.test.skip=true && java -Duser.timezone=Asia/Shanghai -Xms256m -Xmx512m -jar target/*.jar --server.port=${PORT} --management.endpoints.web.exposure.include=health --management.endpoint.health.show-details=always"]
