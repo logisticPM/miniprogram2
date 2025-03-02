@@ -1,25 +1,15 @@
-﻿# 鎺掗櫎鎵€鏈夋枃浠?
-*
-
-# 浠呭寘鍚繀瑕佹枃浠?
-!app/server/pom.xml
-!app/server/src
-
-# 浣嗕粛鎺掗櫎src鐩綍涓殑涓嶅繀瑕佹枃浠?
-app/server/src/**/*.class
-app/server/src/**/*.log
-app/server/src/test/
-
-# 鍏朵粬鐩綍鍜屾枃浠?
+﻿# 版本控制
 .git
 .github
 .gitignore
+
+# 开发工具
 .vscode
 .idea
-app/weapp
-app/miniprogram
-app/panel
-app/cloudfunctions
+
+# 临时文件和构建文件
 **/target/
 **/node_modules/
-**/.DS_Store 
+**/.DS_Store
+**/*.class
+**/*.log

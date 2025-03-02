@@ -1,8 +1,8 @@
 ﻿# 基于微信官方示例优化的Dockerfile
-# 选择构建用基础镜像(使用与官方示例相同的版本)
-FROM maven:3.6.0-jdk-8-slim as build
+# 选择基础镜像(Maven+JDK8)
+FROM maven:3.6.0-jdk-8-slim
 
-# 指定构建过程中的工作目录
+# 指定工作目录
 WORKDIR /app
 
 # 创建settings.xml以使用阿里云Maven镜像源
@@ -21,45 +21,28 @@ RUN mkdir -p /root/.m2 \
     </mirrors>\
     </settings>' > /root/.m2/settings.xml
 
-# 将pom.xml文件复制到工作目录（先复制依赖配置）
-COPY app/server/pom.xml ./pom.xml
-
-# 下载依赖（利用Docker缓存机制）
-RUN mvn dependency:go-offline -B -DskipTests
-
-# 复制源代码
-COPY app/server/src ./src
-
-# 执行代码编译命令
-RUN mvn package -DskipTests
-
-# 选择运行时基础镜像（使用Alpine轻量级镜像）
-FROM openjdk:8-jre-alpine
+# 复制整个项目到容器中
+COPY . .
 
 # 使用国内镜像源安装必要工具
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.cloud.tencent.com/g' /etc/apk/repositories \
-    && apk add --update --no-cache tzdata curl \
-    && rm -rf /var/cache/apk/*
+RUN sed -i 's/deb.debian.org/mirrors.cloud.tencent.com/g' /etc/apt/sources.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends tzdata \
+    && rm -rf /var/lib/apt/lists/*
 
 # 设置时区为上海
 RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo "Asia/Shanghai" > /etc/timezone
 
-# 指定运行时的工作目录
-WORKDIR /app
-
 # 设置端口环境变量（匹配container.config.json）
 ENV PORT=80
-
-# 将构建产物jar包拷贝到运行时目录中（使用通配符允许任何名称的jar）
-COPY --from=build /app/target/*.jar app.jar
 
 # 暴露端口
 EXPOSE ${PORT}
 
-# 添加健康检查（微信云托管推荐）
+# 添加健康检查
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:${PORT}/api/health || exit 1
 
-# 启动命令
-CMD ["sh", "-c", "java -jar app.jar --server.port=${PORT}"]
+# 构建并启动应用
+CMD ["sh", "-c", "cd app/server && mvn package -DskipTests && java -jar target/*.jar --server.port=${PORT}"]
