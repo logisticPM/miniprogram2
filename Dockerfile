@@ -1,10 +1,12 @@
 ﻿# 基于微信官方示例优化的Dockerfile
 # 针对微信云托管环境优化的构建配置
 # 更新日期: 2025-03-02
-# 版本: 1.0.7 - 使用阿里云镜像源解决网络超时问题
+# 版本: 1.0.8 - 回退到Docker Hub官方镜像，建议使用阿里云镜像加速器
+# 注意: 如遇网络问题，请在Docker配置中添加阿里云镜像加速器:
+# https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors
 
 # 第一阶段：构建阶段
-FROM registry.cn-hangzhou.aliyuncs.com/library/maven:3.8.6-openjdk-17 AS builder
+FROM maven:3.8.6-openjdk-17 AS builder
 
 # 指定工作目录
 WORKDIR /build
@@ -40,7 +42,7 @@ RUN mkdir -p /build/static && \
     echo '{"status":"UP"}' > /build/static/health.json
 
 # 第二阶段：运行阶段
-FROM registry.cn-hangzhou.aliyuncs.com/library/openjdk:17-jre-slim
+FROM openjdk:17-jre-slim
 
 # 指定工作目录
 WORKDIR /app
