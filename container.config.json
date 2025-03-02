@@ -1,4 +1,4 @@
-{
+﻿{
   "dockerfilePath": "Dockerfile",
   "buildDir": "",
   "containerPort": 80,
@@ -18,7 +18,7 @@
   "initialDelaySeconds": 60,
   "minNum": 1,
   "maxNum": 50,
-  "remark": "智慧地产房产小程序服务端",
+  "remark": "鏅烘収鍦颁骇鎴夸骇灏忕▼搴忔湇鍔＄",
   "healthCheckConfig": {
     "livenessConfig": {
       "path": "/api/health",
