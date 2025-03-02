@@ -1,32 +1,25 @@
-# 版本控制
+# 排除所有文件
+*
+
+# 仅包含必要文件
+!app/server/pom.xml
+!app/server/src
+
+# 但仍排除src目录中的不必要文件
+app/server/src/**/*.class
+app/server/src/**/*.log
+app/server/src/test/
+
+# 其他目录和文件
 .git
 .github
 .gitignore
-
-# 开发工具
 .vscode
 .idea
-
-# 前端和不相关项目
 app/weapp
 app/miniprogram
 app/panel
 app/cloudfunctions
-
-# 缓存和构建文件
 **/target/
 **/node_modules/
-**/.DS_Store
-
-# 排除所有文件，然后仅包含需要的文件
-*
-!app/server/pom.xml
-!app/server/src
-
-# 在server目录中也排除不需要的文件
-app/server/target
-app/server/.idea
-app/server/.vscode
-app/server/.git
-app/server/logs
-app/server/*.log 
+**/.DS_Store 
