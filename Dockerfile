@@ -1,10 +1,10 @@
 ﻿# 基于微信官方示例优化的Dockerfile
 # 针对微信云托管环境优化的构建配置
 # 更新日期: 2025-03-02
-# 版本: 1.0.5 - 使用多阶段构建解决健康检查问题
+# 版本: 1.0.6 - 升级到Java 17以解决编译错误
 
 # 第一阶段：构建阶段
-FROM maven:3.8.6-openjdk-8 AS builder
+FROM maven:3.8.6-openjdk-17 AS builder
 
 # 指定工作目录
 WORKDIR /build
@@ -40,7 +40,7 @@ RUN mkdir -p /build/static && \
     echo '{"status":"UP"}' > /build/static/health.json
 
 # 第二阶段：运行阶段
-FROM openjdk:8-jre-slim
+FROM openjdk:17-jre-slim
 
 # 指定工作目录
 WORKDIR /app
