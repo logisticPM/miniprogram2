@@ -1,4 +1,5 @@
 package com.udeve.utils.file;
+
 /**
  * +----------------------------------------------------------------------
  * | 友得云客  - 开启房产营销新纪元
@@ -48,16 +49,18 @@ public class UploadFileUtil {
 
     /**
      * 获取允许上传的文件扩展名数组
+     * 
      * @return
      */
     public static String[] getALLOWED_EXTENSION() {
-        //如果没获取到myconfig的静态成员变量就返回默认的扩展名数组
+        // 如果没获取到myconfig的静态成员变量就返回默认的扩展名数组
         if (myconfigRepositoryStatic == null) {
             return Constants.DEFAULT_ALLOWED_EXTENSION;
         }
         Myconfig myconfig = myconfigRepositoryStatic.findFirstByOrderByIdDesc();
-        //如果myconfig表中没有配置扩展名，则返回默认的扩展名数组
-        if (myconfig==null || myconfig.getUploadAllowedExtension()==null || ("").equals(myconfig.getUploadAllowedExtension())) {
+        // 如果myconfig表中没有配置扩展名，则返回默认的扩展名数组
+        if (myconfig == null || myconfig.getUploadAllowedExtension() == null
+                || ("").equals(myconfig.getUploadAllowedExtension())) {
             return Constants.DEFAULT_ALLOWED_EXTENSION;
         }
         String allowedExtension = myconfig.getUploadAllowedExtension();
@@ -79,27 +82,25 @@ public class UploadFileUtil {
 
     public static final String IMAGE_GIF = "image/gif";
 
-
-    public static FileInfo uploadLocal(MultipartFile file , String domain){
-        try
-        {
+    public static FileInfo uploadLocal(MultipartFile file, String domain) {
+        try {
             // 上传文件路径
-            String filePath = UdykUtil.getUploadDir();
-            log.info("upload file path :{}",filePath);
+            String filePath = FileStorageUtil.getUploadDir();
+            log.info("upload file path :{}", filePath);
             // 上传并返回新文件名称 带文件的路径 /filestore/2024/02/01/xxx.png
-            String fileName = upload(filePath,file);
+            String fileName = upload(filePath, file);
 
-            //构建返回对象
+            // 构建返回对象
             FileInfo fileInfo = new FileInfo();
-            if (!("").equals(domain)) {//有配置域名的话换为域名
-                if (domain.endsWith("/")){
-                    domain = domain.substring(0,domain.length()-1);
+            if (!("").equals(domain)) {// 有配置域名的话换为域名
+                if (domain.endsWith("/")) {
+                    domain = domain.substring(0, domain.length() - 1);
                 }
-                fileInfo.setUrl(domain+fileName);
-            }else{
-                //获取url  http://192.168.31.45:8080
+                fileInfo.setUrl(domain + fileName);
+            } else {
+                // 获取url http://192.168.31.45:8080
                 String url = getUrl().isEmpty() ? "" : getUrl();
-                fileInfo.setUrl(url+fileName);
+                fileInfo.setUrl(url + fileName);
             }
 
             fileInfo.setFilename(fileName);
@@ -107,11 +108,9 @@ public class UploadFileUtil {
             fileInfo.setOriginalFilename(file.getOriginalFilename());
             fileInfo.setSize(file.getSize());
             return fileInfo;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("上传失败,"+e.getMessage());
+            throw new RuntimeException("上传失败," + e.getMessage());
         }
 
     }
@@ -119,20 +118,22 @@ public class UploadFileUtil {
     public static String getUrl() {
         String domain;
         try {
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                    .getRequest();
             domain = getDomain(request);
             return domain;
-        }catch (Exception e){
+        } catch (Exception e) {
             log.warn("获取request失败，可能不是客户端发起调用");
             return "";
         }
     }
 
-    // 如果当前请求的 URL 是 http://192.168.31.45:8080/api/v6/upload，应用程序的上下文路径是 ""，那么该方法将返回 http://192.168.31.45:8080
+    // 如果当前请求的 URL 是 http://192.168.31.45:8080/api/v6/upload，应用程序的上下文路径是 ""，那么该方法将返回
+    // http://192.168.31.45:8080
     // URI /api/v6/upload
     public static String getDomain(HttpServletRequest request) {
         StringBuffer url = request.getRequestURL();// http://192.168.31.45:8080/api/v6/upload
-        String contextPath = request.getServletContext().getContextPath();//上下文 ""
+        String contextPath = request.getServletContext().getContextPath();// 上下文 ""
         // 删除 /api/v6/upload
         StringBuffer delete = url.delete(url.length() - request.getRequestURI().length(), url.length());// http://192.168.31.45:8080
         String string = delete.append(contextPath).toString();// http://192.168.31.45:8080
@@ -143,17 +144,14 @@ public class UploadFileUtil {
      * 根据文件路径上传
      *
      * @param baseDir 相对应用的基目录
-     * @param file 上传的文件
+     * @param file    上传的文件
      * @return 文件名称
      * @throws IOException
      */
     public static final String upload(String baseDir, MultipartFile file) throws IOException {
-        try
-        {
+        try {
             return upload(baseDir, file, getALLOWED_EXTENSION());
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new IOException(e.getMessage(), e);
         }
     }
@@ -161,24 +159,24 @@ public class UploadFileUtil {
     /**
      * 文件上传
      *
-     * @param baseDir 相对应用的基目录
-     * @param file 上传的文件
+     * @param baseDir          相对应用的基目录
+     * @param file             上传的文件
      * @param allowedExtension 上传文件类型
      * @return 返回上传成功的文件名
      */
-    public static final String upload(String baseDir, MultipartFile file, String[] allowedExtension) throws  IOException {
+    public static final String upload(String baseDir, MultipartFile file, String[] allowedExtension)
+            throws IOException {
         int fileNamelength = Objects.requireNonNull(file.getOriginalFilename()).length();
-        if (fileNamelength > DEFAULT_FILE_NAME_LENGTH)
-        {
+        if (fileNamelength > DEFAULT_FILE_NAME_LENGTH) {
             throw new RuntimeException("文件名过长");
         }
 
-        //判断是否允许上传的文件类型
-        if(allowedExtension==null||allowedExtension.length==0){
+        // 判断是否允许上传的文件类型
+        if (allowedExtension == null || allowedExtension.length == 0) {
             log.info("未获取到配置文件中的扩展名，使用默认的扩展名");
             allowedExtension = Constants.DEFAULT_ALLOWED_EXTENSION;
         }
-        assertAllowed(file,allowedExtension);
+        assertAllowed(file, allowedExtension);
 
         String fileName = null;
         try {
@@ -194,20 +192,19 @@ public class UploadFileUtil {
 
     /**
      * 校验文件大小和文件扩展名是否规范
+     * 
      * @param file
      * @param allowedExtension
      */
-    public static void assertAllowed(MultipartFile file,String[] allowedExtension){
+    public static void assertAllowed(MultipartFile file, String[] allowedExtension) {
         long size = file.getSize();
-        if (size > Constants.DEFAULT_MAX_SIZE)
-        {
-            throw new RuntimeException("文件大小超过"+Constants.DEFAULT_MAX_SIZE / 1024 / 1024);
+        if (size > Constants.DEFAULT_MAX_SIZE) {
+            throw new RuntimeException("文件大小超过" + Constants.DEFAULT_MAX_SIZE / 1024 / 1024);
         }
         String fileName = file.getOriginalFilename();
         String extension = getExtension(file);
-        if (!isAllowedExtension(extension, allowedExtension))
-        {
-            throw new RuntimeException("["+fileName+"]文件类型错误，请选择正确的文件类型！");
+        if (!isAllowedExtension(extension, allowedExtension)) {
+            throw new RuntimeException("[" + fileName + "]文件类型错误，请选择正确的文件类型！");
         }
 
     }
@@ -219,12 +216,9 @@ public class UploadFileUtil {
      * @param allowedExtension
      * @return
      */
-    public static final boolean isAllowedExtension(String extension, String[] allowedExtension)
-    {
-        for (String str : allowedExtension)
-        {
-            if (str.equalsIgnoreCase(extension))
-            {
+    public static final boolean isAllowedExtension(String extension, String[] allowedExtension) {
+        for (String str : allowedExtension) {
+            if (str.equalsIgnoreCase(extension)) {
                 return true;
             }
         }
@@ -293,16 +287,14 @@ public class UploadFileUtil {
      */
     public static final String getExtension(MultipartFile file) {
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-        if (StringUtils.isEmpty(extension))
-        {
+        if (StringUtils.isEmpty(extension)) {
             extension = getExtension(Objects.requireNonNull(file.getContentType()));
         }
         return extension;
     }
 
     public static String getExtension(String prefix) {
-        switch (prefix)
-        {
+        switch (prefix) {
             case IMAGE_PNG:
                 return "png";
             case IMAGE_JPG:
@@ -318,23 +310,18 @@ public class UploadFileUtil {
         }
     }
 
-    public static final String getPathFileName(String uploadDir,String fileName) throws IOException {
-        /*int dirLastIndex = uploadDir.length() + 1;
-        String currentDir = StringUtils.substring(uploadDir, dirLastIndex);*/
-        String filestorePath = "/"+UdykUtil.getFilestorePath();
+    public static final String getPathFileName(String uploadDir, String fileName) throws IOException {
+        String filestorePath = "/" + FileStorageUtil.getFilestorePath();
         String pathFileName = filestorePath + "/" + fileName;
-        log.info("pathFileName:{}",pathFileName);
+        log.info("pathFileName:{}", pathFileName);
         return pathFileName;
     }
 
-    public static final File getAbsoluteFile(String uploadDir, String fileName) throws IOException
-    {
+    public static final File getAbsoluteFile(String uploadDir, String fileName) throws IOException {
         File desc = new File(uploadDir + File.separator + fileName);
 
-        if (!desc.exists())
-        {
-            if (!desc.getParentFile().exists())
-            {
+        if (!desc.exists()) {
+            if (!desc.getParentFile().exists()) {
                 desc.getParentFile().mkdirs();
             }
         }
@@ -347,10 +334,8 @@ public class UploadFileUtil {
      * @param fileName 路径名称
      * @return 没有文件路径的名称
      */
-    public static String getName(String fileName)
-    {
-        if (fileName == null)
-        {
+    public static String getName(String fileName) {
+        if (fileName == null) {
             return null;
         }
         int lastUnixPos = fileName.lastIndexOf('/');
