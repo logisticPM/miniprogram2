@@ -2,7 +2,11 @@
   "pages": [
     "pages/index/index",
     "pages/logs/logs",
-    "pages/test/test"
+    "pages/test/test",
+    "pages/activity/list/list",
+    "pages/activity/detail/detail",
+    "pages/activity/password/password",
+    "pages/activity/success/success"
   ],
   "window": {
     "navigationBarTextStyle": "white",

@@ -210,6 +210,23 @@ Page({
     });
   },
 
+  // 导航到抢房活动页面
+  navigateToActivity: function () {
+    wx.navigateTo({
+      url: '/pages/activity/list/list',
+      success: function () {
+        console.log('成功导航到抢房活动页面');
+      },
+      fail: function (error) {
+        console.error('导航到抢房活动页面失败', error);
+        wx.showToast({
+          title: '导航失败: ' + error.errMsg,
+          icon: 'none'
+        });
+      }
+    });
+  },
+
   // 测试计数器API
   testCountApi() {
     this.setData({

@@ -1,0 +1,92 @@
+<!-- pages/activity/success/success.wxml -->
+<view class="container">
+    <!-- 加载中 -->
+    <view class="loading" wx:if="{{loading}}">
+        <view class="loading-icon"></view>
+        <text>加载中...</text>
+    </view>
+    <!-- 成功页面内容 -->
+    <block wx:if="{{!loading && activity && house}}">
+        <view class="success-header">
+            <view class="success-icon">
+                <icon type="success" size="64" color="#07c160"></icon>
+            </view>
+            <view class="success-title">抢购成功</view>
+            <view class="success-desc">恭喜您成功抢购到心仪房源</view>
+        </view>
+        <!-- 倒计时 -->
+        <view class="countdown-section">
+            <view class="countdown-title">签约倒计时</view>
+            <view class="countdown-time">{{formatCountdown()}}</view>
+            <view class="countdown-desc">请在24小时内前往售楼部完成签约</view>
+        </view>
+        <!-- 房源信息 -->
+        <view class="house-section">
+            <view class="section-title">房源信息</view>
+            <view class="house-info">
+                <view class="house-images">
+                    <swiper indicator-dots="{{house.images.length > 1}}" autoplay="{{true}}" interval="3000" duration="500">
+                        <block wx:for="{{house.images}}" wx:key="*this">
+                            <swiper-item>
+                                <image src="{{item}}" class="house-image" mode="aspectFill"></image>
+                            </swiper-item>
+                        </block>
+                    </swiper>
+                </view>
+                <view class="house-detail">
+                    <view class="house-title">{{house.title}}</view>
+                    <view class="house-type">{{house.type}} | {{house.area}}㎡</view>
+                    <view class="house-price">{{house.price}}万</view>
+                    <view class="house-address">{{house.address}}</view>
+                    <view class="house-features">
+                        <text class="feature" wx:for="{{house.features}}" wx:key="*this">
+                            {{item}}
+                        </text>
+                    </view>
+                </view>
+            </view>
+        </view>
+        <!-- 抢购信息 -->
+        <view class="grab-section">
+            <view class="section-title">抢购信息</view>
+            <view class="info-item">
+                <text class="label">抢购时间：</text>
+                <text class="value">{{house.soldTime}}</text>
+            </view>
+            <view class="info-item">
+                <text class="label">签约截止：</text>
+                <text class="value">{{house.contractDeadline}}</text>
+            </view>
+            <view class="info-item">
+                <text class="label">活动名称：</text>
+                <text class="value">{{activity.title}}</text>
+            </view>
+        </view>
+        <!-- 联系方式 -->
+        <view class="contact-section">
+            <view class="section-title">联系方式</view>
+            <view class="info-item">
+                <text class="label">联系人：</text>
+                <text class="value">{{activity.contact.name}}</text>
+            </view>
+            <view class="info-item">
+                <text class="label">电话：</text>
+                <text class="value">{{activity.contact.phone}}</text>
+            </view>
+            <view class="info-item">
+                <text class="label">地址：</text>
+                <text class="value">{{activity.contact.address}}</text>
+            </view>
+        </view>
+        <!-- 操作按钮 -->
+        <view class="button-group">
+            <button class="call-btn" bindtap="callSalesOffice">拨打电话</button>
+            <button class="map-btn" bindtap="navigateToMap">查看地图</button>
+            <button class="back-btn" bindtap="backToList">返回列表</button>
+        </view>
+        <!-- 提示信息 -->
+        <view class="tips">
+            <text>温馨提示：请携带有效身份证件前往售楼部签约</text>
+        </view>
+    </block>
+</view>

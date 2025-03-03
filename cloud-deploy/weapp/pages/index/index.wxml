@@ -41,6 +41,7 @@
     <button type="default" bindtap="testCountApi" class="btn">测试计数器API</button>
     <button type="warn" bindtap="clearCount" class="btn-small" wx:if="{{count > 0}}">清零计数器</button>
     <button type="primary" bindtap="navigateToTest">进入测试页面</button>
+    <button type="primary" bindtap="navigateToActivity" class="btn">进入抢房活动</button>
   </view>
   <view class="tips-container">
     <view class="tips-title">常见问题解决方案:</view>

@@ -1,0 +1,146 @@
+<!-- pages/activity/detail/detail.wxml -->
+<view class="container">
+    <!-- 加载中 -->
+    <view class="loading" wx:if="{{loading}}">
+        <view class="loading-icon"></view>
+        <text>加载中...</text>
+    </view>
+    <!-- 活动详情 -->
+    <block wx:if="{{!loading && activity}}">
+        <view class="header">
+            <image class="cover-image" src="{{activity.coverImage}}" mode="aspectFill"></image>
+            <view class="activity-info">
+                <view class="activity-title">{{activity.title}}</view>
+                <view class="activity-desc">{{activity.description}}</view>
+                <view class="activity-meta">
+                    <view class="activity-time">
+                        <text class="label">活动时间：</text>
+                        <text>{{activity.startTime}} 至 {{activity.endTime}}</text>
+                    </view>
+                    <view class="activity-houses">
+                        <text class="label">剩余房源：</text>
+                        <text>{{activity.remainingHouses}}/{{activity.totalHouses}}</text>
+                    </view>
+                    <view class="activity-status {{activity.status === '进行中' ? 'active' : (activity.status === '已结束' ? 'ended' : '')}}">
+                        {{activity.status}}
+                    </view>
+                </view>
+            </view>
+        </view>
+        <!-- 活动规则 -->
+        <view class="section">
+            <view class="section-title">活动规则</view>
+            <view class="rules">
+                <text>{{activity.rules}}</text>
+            </view>
+        </view>
+        <!-- 获取密码 -->
+        <view class="section">
+            <view class="section-title">参与抢购</view>
+            <view class="password-section">
+                <text class="password-tip">需要获取抢购密码才能参与活动</text>
+                <button class="password-btn" bindtap="getPassword">获取抢购密码</button>
+            </view>
+        </view>
+        <!-- 房源列表 -->
+        <view class="section">
+            <view class="section-title">房源列表</view>
+            <view class="house-list">
+                <block wx:if="{{houses.length > 0}}">
+                    <view class="house-item" wx:for="{{houses}}" wx:key="id">
+                        <view class="house-images">
+                            <swiper indicator-dots="{{item.images.length > 1}}" autoplay="{{true}}" interval="3000" duration="500">
+                                <block wx:for="{{item.images}}" wx:for-item="image" wx:key="*this">
+                                    <swiper-item>
+                                        <image src="{{image}}" class="house-image" mode="aspectFill" bindtap="previewHouseImage" data-url="{{image}}" data-urls="{{item.images}}"></image>
+                                    </swiper-item>
+                                </block>
+                            </swiper>
+                            <view class="house-status {{item.status === '可抢' ? 'available' : 'sold'}}">
+                                {{item.status}}
+                            </view>
+                        </view>
+                        <view class="house-info">
+                            <view class="house-title">{{item.title}}</view>
+                            <view class="house-type">{{item.type}} | {{item.area}}㎡</view>
+                            <view class="house-price">{{item.price}}万</view>
+                            <view class="house-address">{{item.address}}</view>
+                            <view class="house-features">
+                                <text class="feature" wx:for="{{item.features}}" wx:for-item="feature" wx:key="*this">
+                                    {{feature}}
+                                </text>
+                            </view>
+                            <button class="grab-btn {{item.status !== '可抢' || activity.status !== '进行中' ? 'disabled' : ''}}" bindtap="showPasswordModal" data-id="{{item.id}}" disabled="{{item.status !== '可抢' || activity.status !== '进行中'}}">
+                                {{item.status === '可抢' ? '立即抢购' : '已被抢购'}}
+                            </button>
+                        </view>
+                    </view>
+                </block>
+                <!-- 空状态 -->
+                <view class="empty" wx:if="{{houses.length === 0}}">
+                    <text>暂无可抢购房源</text>
+                </view>
+            </view>
+        </view>
+        <!-- 联系方式 -->
+        <view class="section">
+            <view class="section-title">联系方式</view>
+            <view class="contact-info">
+                <view class="contact-item">
+                    <text class="label">联系人：</text>
+                    <text>{{activity.contact.name}}</text>
+                </view>
+                <view class="contact-item">
+                    <text class="label">电话：</text>
+                    <text>{{activity.contact.phone}}</text>
+                </view>
+                <view class="contact-item">
+                    <text class="label">地址：</text>
+                    <text>{{activity.contact.address}}</text>
+                </view>
+            </view>
+        </view>
+    </block>
+    <!-- 密码验证弹窗 -->
+    <view class="modal" wx:if="{{passwordModalVisible}}">
+        <view class="modal-mask" bindtap="hidePasswordModal"></view>
+        <view class="modal-content">
+            <view class="modal-header">
+                <text>输入抢购密码</text>
+                <view class="modal-close" bindtap="hidePasswordModal">×</view>
+            </view>
+            <view class="modal-body">
+                <input class="password-input" type="text" placeholder="请输入抢购密码" value="{{password}}" bindinput="onPasswordInput" focus="{{passwordModalVisible}}" />
+                <view class="verify-result {{verifySuccess ? 'success' : 'error'}}" wx:if="{{verifyResult}}">
+                    {{verifyResult}}
+                </view>
+            </view>
+            <view class="modal-footer">
+                <button class="cancel-btn" bindtap="hidePasswordModal">取消</button>
+                <button class="confirm-btn" bindtap="verifyPassword" loading="{{verifying}}">
+                    确认
+                </button>
+            </view>
+        </view>
+    </view>
+    <!-- 确认抢购弹窗 -->
+    <view class="modal" wx:if="{{confirmModalVisible}}">
+        <view class="modal-mask" bindtap="hideConfirmModal"></view>
+        <view class="modal-content">
+            <view class="modal-header">
+                <text>确认抢购</text>
+                <view class="modal-close" bindtap="hideConfirmModal">×</view>
+            </view>
+            <view class="modal-body">
+                <view class="confirm-message">
+                    <text>您确定要抢购该房源吗？</text>
+                    <text class="confirm-tip">抢购成功后，需在24小时内完成签约</text>
+                </view>
+            </view>
+            <view class="modal-footer">
+                <button class="cancel-btn" bindtap="hideConfirmModal">取消</button>
+                <button class="confirm-btn" bindtap="grabHouse" loading="{{grabbing}}">确认抢购</button>
+            </view>
+        </view>
+    </view>
+</view>

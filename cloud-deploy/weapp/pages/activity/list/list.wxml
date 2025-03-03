@@ -1,0 +1,52 @@
+<!-- pages/activity/list/list.wxml -->
+<view class="container">
+    <view class="header">
+        <view class="title">抢房活动</view>
+        <view class="subtitle">参与活动，抢购心仪房源</view>
+    </view>
+    <!-- 活动列表 -->
+    <view class="activity-list">
+        <block wx:if="{{!loading && activities.length > 0}}">
+            <view class="activity-item" wx:for="{{activities}}" wx:key="id" bindtap="navigateToDetail" data-id="{{item.id}}">
+                <image class="activity-cover" src="{{item.coverImage}}" mode="aspectFill"></image>
+                <view class="activity-info">
+                    <view class="activity-title">{{item.title}}</view>
+                    <view class="activity-desc">{{item.description}}</view>
+                    <view class="activity-meta">
+                        <view class="activity-time">
+                            <text class="label">时间：</text>
+                            <text>{{item.startTime}} 至 {{item.endTime}}</text>
+                        </view>
+                        <view class="activity-houses">
+                            <text class="label">房源：</text>
+                            <text>{{item.remainingHouses}}/{{item.totalHouses}}</text>
+                        </view>
+                    </view>
+                    <view class="activity-status {{item.status === '进行中' ? 'active' : (item.status === '已结束' ? 'ended' : '')}}">
+                        {{item.status}}
+                    </view>
+                </view>
+            </view>
+            <!-- 加载更多 -->
+            <view class="loading-more" wx:if="{{loadingMore}}">
+                <view class="loading-icon"></view>
+                <text>加载更多...</text>
+            </view>
+            <!-- 没有更多 -->
+            <view class="no-more" wx:if="{{!hasMore && !loadingMore && activities.length > 0}}">
+                <text>没有更多活动了</text>
+            </view>
+        </block>
+        <!-- 加载中 -->
+        <view class="loading" wx:if="{{loading}}">
+            <view class="loading-icon"></view>
+            <text>加载中...</text>
+        </view>
+        <!-- 空状态 -->
+        <view class="empty" wx:if="{{!loading && activities.length === 0}}">
+            <image class="empty-icon" src="/assets/images/empty.png" mode="aspectFit"></image>
+            <text>暂无抢房活动</text>
+            <button class="refresh-btn" bindtap="onPullDownRefresh">刷新</button>
+        </view>
+    </view>
+</view>
