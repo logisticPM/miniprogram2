@@ -1,0 +1,92 @@
+<view class="container">
+  <view class="filter-section" wx:if="{{!loading && !error && roomList.length > 0}}">
+    <view class="filter-row">
+      <view class="filter-title">单元:</view>
+      <view class="filter-options">
+        <view class="filter-option {{unitFilter === 'all' ? 'active' : ''}}" bindtap="changeUnitFilter" data-value="all">全部</view>
+        <view class="filter-option {{unitFilter == item ? 'active' : ''}}" wx:for="{{units}}" wx:key="*this" bindtap="changeUnitFilter" data-value="{{item}}">{{item}}单元</view>
+      </view>
+    </view>
+    
+    <view class="filter-row">
+      <view class="filter-title">楼层:</view>
+      <view class="filter-options">
+        <view class="filter-option {{floorFilter === 'all' ? 'active' : ''}}" bindtap="changeFloorFilter" data-value="all">全部</view>
+        <view class="filter-option {{floorFilter == item ? 'active' : ''}}" wx:for="{{floors}}" wx:key="*this" bindtap="changeFloorFilter" data-value="{{item}}">{{item}}层</view>
+      </view>
+    </view>
+    
+    <view class="filter-row">
+      <view class="filter-title">户型:</view>
+      <view class="filter-options">
+        <view class="filter-option {{typeFilter === 'all' ? 'active' : ''}}" bindtap="changeTypeFilter" data-value="all">全部</view>
+        <view class="filter-option {{typeFilter === item ? 'active' : ''}}" wx:for="{{types}}" wx:key="*this" bindtap="changeTypeFilter" data-value="{{item}}">{{item}}型</view>
+      </view>
+    </view>
+    
+    <view class="filter-row">
+      <view class="filter-title">状态:</view>
+      <view class="filter-options">
+        <view class="filter-option {{statusFilter === 'all' ? 'active' : ''}}" bindtap="changeStatusFilter" data-value="all">全部</view>
+        <view class="filter-option {{statusFilter === 'available' ? 'active' : ''}}" bindtap="changeStatusFilter" data-value="available">可抢</view>
+        <view class="filter-option {{statusFilter === 'grabbed' ? 'active' : ''}}" bindtap="changeStatusFilter" data-value="grabbed">已抢</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="room-list" wx:if="{{!loading && !error && filteredRooms.length > 0}}">
+    <view class="room-item {{room.status === 1 ? 'grabbed' : ''}} {{selectedRooms.includes(room.id) ? 'selected' : ''}}" 
+          wx:for="{{filteredRooms}}" 
+          wx:key="id" 
+          wx:for-item="room"
+          bindtap="{{room.status === 0 ? 'toggleRoomSelection' : ''}}" 
+          data-id="{{room.id}}">
+      <view class="room-info">
+        <view class="room-number">{{room.roomNumber}}</view>
+        <view class="room-detail">
+          <text>{{room.unit}}单元 {{room.floor}}层 {{room.houseType}}型</text>
+        </view>
+      </view>
+      <view class="room-status">
+        <text wx:if="{{room.status === 0}}">可抢</text>
+        <text wx:elif="{{room.status === 1}}">已抢</text>
+      </view>
+      <view class="room-check" wx:if="{{room.status === 0 && selectedRooms.includes(room.id)}}">
+        <icon type="success" size="20" color="#1989fa"/>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-list" wx:if="{{!loading && !error && filteredRooms.length === 0}}">
+    <text>没有符合条件的房间</text>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="error" wx:if="{{error}}">
+    <text>{{error}}</text>
+    <view class="retry-btn" bindtap="fetchRoomList" data-id="{{activityId}}">重试</view>
+  </view>
+
+  <view class="bottom-bar" wx:if="{{!loading && !error && roomList.length > 0}}">
+    <view class="selected-count">已选: {{selectedRooms.length}}个</view>
+    <view class="submit-btn {{selectedRooms.length === 0 ? 'disabled' : ''}}" bindtap="showPhoneInput">提交抢房</view>
+  </view>
+
+  <!-- 手机号输入弹窗 -->
+  <view class="phone-dialog" wx:if="{{showPhoneDialog}}">
+    <view class="dialog-mask" bindtap="closePhoneInput"></view>
+    <view class="dialog-content">
+      <view class="dialog-title">请输入手机号</view>
+      <view class="dialog-input">
+        <input type="number" placeholder="请输入手机号" bindinput="onPhoneInput" value="{{phoneNumber}}" maxlength="11" />
+      </view>
+      <view class="dialog-buttons">
+        <view class="dialog-btn cancel" bindtap="closePhoneInput">取消</view>
+        <view class="dialog-btn confirm" bindtap="submitGrab">确认</view>
+      </view>
+    </view>
+  </view>
+</view>

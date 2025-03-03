@@ -1,0 +1,40 @@
+<view class="container">
+  <view class="phone-query" wx:if="{{showPhoneInput}}">
+    <view class="query-title">查询抢房记录</view>
+    <view class="query-input">
+      <input type="number" placeholder="请输入手机号" bindinput="onPhoneInput" value="{{phoneNumber}}" maxlength="11" />
+    </view>
+    <view class="query-btn" bindtap="queryRecord">查询</view>
+  </view>
+
+  <view class="record-list" wx:if="{{!showPhoneInput && !loading && !error && recordList.length > 0}}">
+    <view class="record-header">
+      <view class="phone-display">{{phoneNumber}} 的抢房记录</view>
+      <view class="back-btn" bindtap="backToQuery">重新查询</view>
+    </view>
+    
+    <view class="record-item" wx:for="{{recordList}}" wx:key="id">
+      <view class="record-activity">{{item.activityTitle}}</view>
+      <view class="record-rooms">
+        <view class="room-tag" wx:for="{{item.rooms}}" wx:key="id" wx:for-item="room">
+          {{room.roomNumber}}
+        </view>
+      </view>
+      <view class="record-time">抢购时间: {{item.grabTime}}</view>
+    </view>
+  </view>
+
+  <view class="empty-record" wx:if="{{!showPhoneInput && !loading && !error && recordList.length === 0}}">
+    <text>暂无抢房记录</text>
+    <view class="back-link" bindtap="backToQuery">重新查询</view>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="error" wx:if="{{error}}">
+    <text>{{error}}</text>
+    <view class="retry-btn" bindtap="queryRecord">重试</view>
+  </view>
+</view>

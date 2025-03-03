@@ -1,0 +1,36 @@
+<view class="container">
+  <view class="header">
+    <view class="title">抢房活动</view>
+    <view class="record-btn" bindtap="navigateToRecord">我的记录</view>
+  </view>
+
+  <view class="activity-list" wx:if="{{!loading && !error && activityList.length > 0}}">
+    <view class="activity-item" wx:for="{{activityList}}" wx:key="id" bindtap="navigateToActivity" data-id="{{item.id}}">
+      <view class="activity-title">{{item.title}}</view>
+      <view class="activity-info">
+        <view class="activity-building">{{item.buildingNumber}}</view>
+        <view class="activity-time">
+          {{item.startTime}} - {{item.endTime}}
+        </view>
+      </view>
+      <view class="activity-status status-{{item.status}}">
+        <text wx:if="{{item.status === 0}}">未开始</text>
+        <text wx:elif="{{item.status === 1}}">进行中</text>
+        <text wx:elif="{{item.status === 2}}">已结束</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-list" wx:if="{{!loading && !error && activityList.length === 0}}">
+    <text>暂无抢房活动</text>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="error" wx:if="{{error}}">
+    <text>{{error}}</text>
+    <view class="retry-btn" bindtap="fetchActivityList">重试</view>
+  </view>
+</view>

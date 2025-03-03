@@ -1,0 +1,72 @@
+<view class="container">
+  <view class="activity-detail" wx:if="{{!loading && !error && activity}}">
+    <view class="activity-header">
+      <view class="activity-title">{{activity.title}}</view>
+      <view class="activity-status status-{{activity.status}}">
+        <text wx:if="{{activity.status === 0}}">未开始</text>
+        <text wx:elif="{{activity.status === 1}}">进行中</text>
+        <text wx:elif="{{activity.status === 2}}">已结束</text>
+      </view>
+    </view>
+
+    <view class="activity-info">
+      <view class="info-item">
+        <view class="info-label">楼号</view>
+        <view class="info-value">{{activity.buildingNumber}}</view>
+      </view>
+      <view class="info-item">
+        <view class="info-label">单元数</view>
+        <view class="info-value">{{activity.unitCount}}单元</view>
+      </view>
+      <view class="info-item">
+        <view class="info-label">楼层数</view>
+        <view class="info-value">{{activity.floorCount}}层</view>
+      </view>
+      <view class="info-item">
+        <view class="info-label">户型</view>
+        <view class="info-value">{{activity.houseTypes}}</view>
+      </view>
+    </view>
+
+    <view class="activity-time">
+      <view class="time-item">
+        <view class="time-label">开始时间</view>
+        <view class="time-value">{{activity.startTime}}</view>
+      </view>
+      <view class="time-item">
+        <view class="time-label">结束时间</view>
+        <view class="time-value">{{activity.endTime}}</view>
+      </view>
+    </view>
+
+    <view class="action-btn {{activity.status !== 1 ? 'disabled' : ''}}" bindtap="{{activity.status === 1 ? 'showPasswordInput' : ''}}">
+      <text wx:if="{{activity.status === 0}}">活动未开始</text>
+      <text wx:elif="{{activity.status === 1}}">参与抢房</text>
+      <text wx:elif="{{activity.status === 2}}">活动已结束</text>
+    </view>
+  </view>
+
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <view class="error" wx:if="{{error}}">
+    <text>{{error}}</text>
+    <view class="retry-btn" bindtap="fetchActivityDetail" data-id="{{activityId}}">重试</view>
+  </view>
+
+  <!-- 密码输入弹窗 -->
+  <view class="password-dialog" wx:if="{{showPasswordDialog}}">
+    <view class="dialog-mask" bindtap="closePasswordInput"></view>
+    <view class="dialog-content">
+      <view class="dialog-title">请输入活动密码</view>
+      <view class="dialog-input">
+        <input type="password" placeholder="请输入密码" bindinput="onPasswordInput" value="{{password}}" />
+      </view>
+      <view class="dialog-buttons">
+        <view class="dialog-btn cancel" bindtap="closePasswordInput">取消</view>
+        <view class="dialog-btn confirm" bindtap="verifyPassword">确认</view>
+      </view>
+    </view>
+  </view>
+</view>
