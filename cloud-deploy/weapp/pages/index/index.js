@@ -21,7 +21,11 @@ Page({
     apiStatusClass: '',
     testResult: '',
     useCloudContainer: config.useCloudContainer,
-    count: 0
+    count: 0,
+    phoneNumber: '',
+    hasPhoneNumber: false,
+    isAdmin: false,
+    adminPassword: '000000'
   },
   bindViewTap() {
     wx.navigateTo({
@@ -63,6 +67,14 @@ Page({
       serviceName: config.serviceName,
       useCloudContainer: config.useCloudContainer
     })
+
+    const phoneNumber = wx.getStorageSync('phoneNumber');
+    if (phoneNumber) {
+      this.setData({
+        phoneNumber: phoneNumber,
+        hasPhoneNumber: true
+      });
+    }
 
     // 自动测试API连接
     this.testApiConnection()
@@ -206,6 +218,164 @@ Page({
           title: '导航失败: ' + error.errMsg,
           icon: 'none'
         });
+      }
+    });
+  },
+
+  // 获取用户手机号
+  getPhoneNumber(e) {
+    if (e.detail.errMsg === 'getPhoneNumber:ok') {
+      // 模拟获取手机号成功
+      // 实际应用中需要调用云函数解密获取真实手机号
+      const mockPhoneNumber = '1' + Math.floor(Math.random() * 9000000000 + 1000000000);
+
+      this.setData({
+        phoneNumber: mockPhoneNumber,
+        hasPhoneNumber: true
+      });
+
+      // 存储手机号
+      wx.setStorageSync('phoneNumber', mockPhoneNumber);
+
+      wx.showToast({
+        title: '授权成功',
+        icon: 'success'
+      });
+
+      // 实际代码应该是：
+      /*
+      wx.cloud.callFunction({
+        name: 'getPhoneNumber',
+        data: {
+          weRunData: wx.cloud.CloudID(e.detail.cloudID)
+        }
+      }).then(res => {
+        const phoneNumber = res.result.phoneNumber;
+        this.setData({
+          phoneNumber: phoneNumber,
+          hasPhoneNumber: true
+        });
+        wx.setStorageSync('phoneNumber', phoneNumber);
+      }).catch(err => {
+        console.error(err);
+        wx.showToast({
+          title: '获取手机号失败',
+          icon: 'none'
+        });
+      });
+      */
+    } else {
+      wx.showToast({
+        title: '您拒绝了授权',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 创建抢房活动
+  createActivity() {
+    // 检查是否有手机号
+    if (!this.data.hasPhoneNumber) {
+      wx.showToast({
+        title: '请先授权手机号',
+        icon: 'none'
+      });
+      return;
+    }
+
+    // 弹出管理员密码输入框
+    wx.showModal({
+      title: '管理员验证',
+      content: '请输入管理员密码',
+      editable: true,
+      placeholderText: '请输入密码',
+      success: (res) => {
+        if (res.confirm) {
+          const password = res.content;
+
+          // 验证密码
+          if (password === this.data.adminPassword) {
+            // 密码正确，跳转到创建活动页面
+            wx.navigateTo({
+              url: '/pages/activity/create/create'
+            });
+          } else {
+            wx.showToast({
+              title: '密码错误',
+              icon: 'none'
+            });
+          }
+        }
+      }
+    });
+  },
+
+  // 参加抢房活动
+  joinActivity() {
+    // 检查是否有手机号
+    if (!this.data.hasPhoneNumber) {
+      wx.showToast({
+        title: '请先授权手机号',
+        icon: 'none'
+      });
+      return;
+    }
+
+    // 弹出活动密码输入框
+    wx.showModal({
+      title: '活动验证',
+      content: '请输入活动参与密码',
+      editable: true,
+      placeholderText: '请输入密码',
+      success: (res) => {
+        if (res.confirm) {
+          const password = res.content;
+
+          if (password) {
+            // 验证活动密码
+            // 这里应该调用API验证密码，暂时模拟验证成功
+            setTimeout(() => {
+              // 密码验证成功，跳转到抢房页面
+              wx.navigateTo({
+                url: `/pages/activity/grab/grab?password=${password}`
+              });
+            }, 1000);
+
+            wx.showLoading({
+              title: '验证中...',
+            });
+
+            // 实际代码应该是：
+            /*
+            request.post('/api/activities/verify-password', { password })
+              .then(res => {
+                wx.hideLoading();
+                if (res.code === 200) {
+                  wx.navigateTo({
+                    url: `/pages/activity/grab/grab?activityId=${res.data.activityId}&password=${password}`
+                  });
+                } else {
+                  wx.showToast({
+                    title: res.message || '密码错误',
+                    icon: 'none'
+                  });
+                }
+              })
+              .catch(err => {
+                wx.hideLoading();
+                wx.showToast({
+                  title: '验证失败，请重试',
+                  icon: 'none'
+                });
+              });
+            */
+          } else {
+            wx.showToast({
+              title: '请输入密码',
+              icon: 'none'
+            });
+          }
+        }
       }
     });
   },

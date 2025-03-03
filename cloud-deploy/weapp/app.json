@@ -6,11 +6,13 @@
     "pages/activity/list/list",
     "pages/activity/detail/detail",
     "pages/activity/password/password",
-    "pages/activity/success/success"
+    "pages/activity/success/success",
+    "pages/activity/create/create",
+    "pages/activity/grab/grab"
   ],
   "window": {
     "navigationBarTextStyle": "white",
-    "navigationBarTitleText": "房产小程序云托管版",
+    "navigationBarTitleText": "房产抢购小程序",
     "navigationBarBackgroundColor": "#07c160",
     "backgroundColor": "#f7f7f7"
   },

@@ -22,6 +22,8 @@
 	"executeSQLs": [
 		"CREATE DATABASE IF NOT EXISTS springboot_demo;",
 		"USE springboot_demo;",
-		"CREATE TABLE IF NOT EXISTS `Counters` (`id` int(11) NOT NULL AUTO_INCREMENT, `count` int(11) NOT NULL DEFAULT 1, `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`id`)) ENGINE = InnoDB DEFAULT CHARSET = utf8;"
+		"CREATE TABLE IF NOT EXISTS `Counters` (`id` int(11) NOT NULL AUTO_INCREMENT, `count` int(11) NOT NULL DEFAULT 1, `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`id`)) ENGINE = InnoDB DEFAULT CHARSET = utf8;",
+		"CREATE TABLE IF NOT EXISTS `Activities` (`id` int(11) NOT NULL AUTO_INCREMENT, `title` varchar(255) NOT NULL, `startTime` datetime NOT NULL, `endTime` datetime NOT NULL, `password` varchar(255) NOT NULL, `buildingNumber` varchar(50) NOT NULL, `unitCount` int(11) NOT NULL, `floorCount` int(11) NOT NULL, `status` varchar(20) NOT NULL DEFAULT 'active', `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`id`)) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;",
+		"CREATE TABLE IF NOT EXISTS `Rooms` (`id` int(11) NOT NULL AUTO_INCREMENT, `activityId` int(11) NOT NULL, `buildingNumber` varchar(50) NOT NULL, `unitNumber` int(11) NOT NULL, `floorNumber` int(11) NOT NULL, `roomNumber` varchar(20) NOT NULL, `houseType` varchar(50) NOT NULL, `status` varchar(20) NOT NULL DEFAULT 'available', `phoneNumber` varchar(20) DEFAULT NULL, `grabTime` datetime DEFAULT NULL, `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`id`), KEY `idx_activityId` (`activityId`), KEY `idx_status` (`status`), KEY `idx_phoneNumber` (`phoneNumber`)) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;"
 	]
 }

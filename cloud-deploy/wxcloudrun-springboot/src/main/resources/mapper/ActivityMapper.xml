@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tencent.wxcloudrun.dao.ActivityMapper">
+
+    <resultMap id="activityMapper" type="com.tencent.wxcloudrun.model.Activity">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="startTime" column="startTime" javaType="java.time.LocalDateTime" />
+        <result property="endTime" column="endTime" javaType="java.time.LocalDateTime" />
+        <result property="password" column="password"/>
+        <result property="buildingNumber" column="buildingNumber"/>
+        <result property="unitCount" column="unitCount"/>
+        <result property="floorCount" column="floorCount"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="createdAt" javaType="java.time.LocalDateTime" />
+        <result property="updatedAt" column="updatedAt" javaType="java.time.LocalDateTime" />
+    </resultMap>
+
+    <insert id="createActivity" parameterType="com.tencent.wxcloudrun.model.Activity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO Activities (
+            title, startTime, endTime, password, buildingNumber, 
+            unitCount, floorCount, status
+        ) VALUES (
+            #{title}, #{startTime}, #{endTime}, #{password}, #{buildingNumber}, 
+            #{unitCount}, #{floorCount}, #{status}
+        )
+    </insert>
+
+    <select id="getActivityById" resultMap="activityMapper" parameterType="java.lang.Integer">
+        SELECT id, title, startTime, endTime, password, buildingNumber, 
+               unitCount, floorCount, status, createdAt, updatedAt
+        FROM Activities
+        WHERE id = #{id}
+    </select>
+
+    <select id="getAllActivities" resultMap="activityMapper">
+        SELECT id, title, startTime, endTime, password, buildingNumber, 
+               unitCount, floorCount, status, createdAt, updatedAt
+        FROM Activities
+        ORDER BY createdAt DESC
+    </select>
+
+    <select id="getActiveActivities" resultMap="activityMapper">
+        SELECT id, title, startTime, endTime, password, buildingNumber, 
+               unitCount, floorCount, status, createdAt, updatedAt
+        FROM Activities
+        WHERE status = 'active'
+        ORDER BY createdAt DESC
+    </select>
+
+    <update id="updateActivity" parameterType="com.tencent.wxcloudrun.model.Activity">
+        UPDATE Activities
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="startTime != null">startTime = #{startTime},</if>
+            <if test="endTime != null">endTime = #{endTime},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="buildingNumber != null">buildingNumber = #{buildingNumber},</if>
+            <if test="unitCount != null">unitCount = #{unitCount},</if>
+            <if test="floorCount != null">floorCount = #{floorCount},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateActivityStatus">
+        UPDATE Activities
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

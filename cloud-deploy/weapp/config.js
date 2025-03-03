@@ -10,24 +10,34 @@
 */
 
 // 是否为开发环境
-const isDev = false; // 切换为true时使用开发环境
+const isDev = true; // 设置为true启用开发环境
 
 // 云开发环境配置
 const config = {
   // 使用云开发时，apiBaseUrl可以为空，因为路径直接在请求中指定
   apiBaseUrl: '',
   env: isDev ? 'development' : 'production',
-  // 云环境ID，替换为您的实际环境ID
-  cloudEnv: isDev ? 'dev-environment-id' : 'your-cloud-env-id',
-  // 服务名称，替换为您的实际服务名称
-  serviceName: 'your-service-name',
+  // 从微信云托管控制台获取的环境ID
+  cloudEnv: '0d1hHa0w390gu43Oq0w3A1CXs1hHa0Z', // 使用控制台日志中显示的实际环境ID
+  // 从微信云托管控制台获取的服务名称
+  serviceName: 'wxcloudrun-springboot', // 使用您的实际服务名称
   // 基础库最低版本要求
-  minLibVersion: '2.23.0'
+  minLibVersion: '2.23.0',
+  // 是否启用本地调试日志
+  enableDebugLog: true,
+  // 是否使用云托管容器调用（绕过域名限制）
+  useCloudContainer: true
 };
+
+// 计算API主机地址（用于普通HTTP请求）
+config.apiHost = `https://${config.serviceName}-${config.cloudEnv}.ap-shanghai.app.tcloudbase.com`;
 
 // 检查基础库版本
 const checkBaseLibVersion = () => {
-  const version = wx.getSystemInfoSync().SDKVersion;
+  // 使用推荐的API替代已弃用的wx.getSystemInfoSync
+  const systemInfo = wx.getSystemInfoSync();
+  const version = systemInfo.SDKVersion;
+
   if (compareVersion(version, config.minLibVersion) < 0) {
     wx.showModal({
       title: '提示',

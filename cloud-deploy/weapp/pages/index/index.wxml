@@ -1,10 +1,31 @@
 <!-- index.wxml -->
 <view class="container">
   <view class="header">
-    <view class="title">微信云托管测试</view>
-    <view class="subtitle">房产小程序云托管版</view>
+    <view class="title">房产抢购小程序</view>
+    <view class="subtitle">微信云托管版</view>
   </view>
-  <view class="card">
+  <!-- 用户授权区域 -->
+  <view class="auth-section">
+    <block wx:if="{{!hasPhoneNumber}}">
+      <view class="auth-tip">请先授权获取手机号</view>
+      <button class="auth-btn" open-type="getPhoneNumber" bindgetphonenumber="getPhoneNumber">
+        授权手机号
+      </button>
+    </block>
+    <block wx:else>
+      <view class="user-info">
+        <view class="phone-number">{{phoneNumber}}</view>
+        <view class="auth-status">已授权</view>
+      </view>
+    </block>
+  </view>
+  <!-- 主功能按钮 -->
+  <view class="main-buttons" wx:if="{{hasPhoneNumber}}">
+    <button type="primary" bindtap="createActivity" class="main-btn">创建抢房活动</button>
+    <button type="primary" bindtap="joinActivity" class="main-btn">参加抢房活动</button>
+  </view>
+  <!-- 云环境信息卡片 -->
+  <view class="card" wx:if="{{hasPhoneNumber}}">
     <view class="card-title">云环境配置</view>
     <view class="info-item">
       <text class="label">环境ID:</text>
@@ -26,6 +47,7 @@
       </view>
     </view>
   </view>
+  <!-- 计数器卡片 -->
   <view class="card" wx:if="{{count > 0 || testResult}}">
     <view class="card-title">计数器</view>
     <view class="info-item" wx:if="{{count > 0}}">
@@ -36,26 +58,25 @@
       <text>{{testResult}}</text>
     </view>
   </view>
-  <view class="button-container">
-    <button type="primary" bindtap="handleTestApi" class="btn">测试健康检查API</button>
+  <!-- 测试按钮区域 -->
+  <view class="button-container" wx:if="{{hasPhoneNumber}}">
+    <button type="default" bindtap="handleTestApi" class="btn">测试健康检查API</button>
     <button type="default" bindtap="testCountApi" class="btn">测试计数器API</button>
     <button type="warn" bindtap="clearCount" class="btn-small" wx:if="{{count > 0}}">清零计数器</button>
-    <button type="primary" bindtap="navigateToTest">进入测试页面</button>
-    <button type="primary" bindtap="navigateToActivity" class="btn">进入抢房活动</button>
+    <button type="default" bindtap="navigateToTest">进入测试页面</button>
+    <button type="default" bindtap="navigateToActivity" class="btn">查看活动列表</button>
   </view>
-  <view class="tips-container">
-    <view class="tips-title">常见问题解决方案:</view>
+  <!-- 提示信息 -->
+  <view class="tips-container" wx:if="{{hasPhoneNumber}}">
+    <view class="tips-title">使用说明:</view>
     <view class="tips-item">
-      <text>1. 域名白名单问题: 在微信公众平台添加云托管域名到request合法域名</text>
+      <text>1. 创建抢房活动：需要管理员密码验证</text>
     </view>
     <view class="tips-item">
-      <text>2. 云托管容器调用: 启用上方开关，使用wx.cloud.callContainer绕过域名限制</text>
+      <text>2. 参加抢房活动：需要输入活动参与密码</text>
     </view>
     <view class="tips-item">
-      <text>3. 开发工具设置: 确保勾选"不校验合法域名"选项</text>
-    </view>
-    <view class="tips-item">
-      <text>4. API返回400错误: 系统会自动使用模拟响应，可继续开发</text>
+      <text>3. 抢房成功后：系统会记录您的手机号和房间信息</text>
     </view>
   </view>
 </view>

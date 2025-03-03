@@ -3,7 +3,12 @@ page {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: #f7f7f7;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+    Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei',
+    sans-serif;
 }
+
 .scrollarea {
   flex: 1;
   overflow-y: hidden;
@@ -59,4 +64,204 @@ page {
 
 .nickname-input {
   flex: 1;
+}
+
+.container {
+  padding: 20rpx;
+}
+
+/* 头部样式 */
+.header {
+  margin-bottom: 30rpx;
+  text-align: center;
+  padding: 30rpx 0;
+}
+
+.title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* 授权区域样式 */
+.auth-section {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.auth-tip {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 20rpx;
+}
+
+.auth-btn {
+  background-color: #07c160;
+  color: #fff;
+  font-size: 28rpx;
+  padding: 15rpx 0;
+  border-radius: 40rpx;
+  width: 80%;
+}
+
+.user-info {
+  padding: 20rpx 0;
+}
+
+.phone-number {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.auth-status {
+  font-size: 24rpx;
+  color: #07c160;
+  background-color: rgba(7, 193, 96, 0.1);
+  padding: 4rpx 20rpx;
+  border-radius: 20rpx;
+  display: inline-block;
+}
+
+/* 主功能按钮样式 */
+.main-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.main-btn {
+  height: 90rpx;
+  line-height: 90rpx;
+  border-radius: 45rpx;
+  font-size: 32rpx;
+  background-color: #07c160;
+}
+
+/* 卡片样式 */
+.card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15rpx;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15rpx;
+  font-size: 28rpx;
+}
+
+.label {
+  color: #666;
+  width: 180rpx;
+  flex-shrink: 0;
+}
+
+.value {
+  color: #333;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.status {
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+}
+
+.status-success {
+  background-color: rgba(7, 193, 96, 0.1);
+  color: #07c160;
+}
+
+.status-error {
+  background-color: rgba(250, 81, 81, 0.1);
+  color: #fa5151;
+}
+
+.status-testing {
+  background-color: rgba(25, 137, 250, 0.1);
+  color: #1989fa;
+}
+
+.count {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #07c160;
+}
+
+.result-box {
+  background-color: #f9f9f9;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 20rpx;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* 按钮容器样式 */
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.btn {
+  font-size: 28rpx;
+}
+
+.btn-small {
+  font-size: 26rpx;
+  margin-top: -10rpx;
+}
+
+/* 提示区域样式 */
+.tips-container {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.tips-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  margin-bottom: 15rpx;
+  color: #333;
+}
+
+.tips-item {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+  line-height: 1.5;
 }

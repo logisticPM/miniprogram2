@@ -1,0 +1,83 @@
+package com.tencent.wxcloudrun.dao;
+
+import com.tencent.wxcloudrun.model.Room;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+import java.util.Optional;
+
+@Mapper
+public interface RoomMapper {
+
+    /**
+     * 创建房间
+     * @param room 房间对象
+     */
+    void createRoom(Room room);
+
+    /**
+     * 批量创建房间
+     * @param rooms 房间列表
+     */
+    void batchCreateRooms(List<Room> rooms);
+
+    /**
+     * 根据ID获取房间
+     * @param id 房间ID
+     * @return 房间对象
+     */
+    Optional<Room> getRoomById(@Param("id") Integer id);
+
+    /**
+     * 根据活动ID获取房间列表
+     * @param activityId 活动ID
+     * @return 房间列表
+     */
+    List<Room> getRoomsByActivityId(@Param("activityId") Integer activityId);
+
+    /**
+     * 根据活动ID、楼号和楼层获取房间列表
+     * @param activityId 活动ID
+     * @param buildingNumber 楼号
+     * @param floorNumber 楼层
+     * @return 房间列表
+     */
+    List<Room> getRoomsByBuildingAndFloor(
+            @Param("activityId") Integer activityId,
+            @Param("buildingNumber") String buildingNumber,
+            @Param("floorNumber") Integer floorNumber);
+
+    /**
+     * 更新房间
+     * @param room 房间对象
+     */
+    void updateRoom(Room room);
+
+    /**
+     * 根据活动ID和手机号获取抢购记录
+     * @param activityId 活动ID
+     * @param phoneNumber 手机号
+     * @return 房间列表
+     */
+    List<Room> getGrabRecordsByPhoneNumber(
+            @Param("activityId") Integer activityId,
+            @Param("phoneNumber") String phoneNumber);
+
+    /**
+     * 获取活动中的楼栋列表
+     * @param activityId 活动ID
+     * @return 楼栋列表
+     */
+    List<String> getBuildingsByActivityId(@Param("activityId") Integer activityId);
+
+    /**
+     * 获取活动中特定楼栋的楼层列表
+     * @param activityId 活动ID
+     * @param buildingNumber 楼号
+     * @return 楼层列表
+     */
+    List<Integer> getFloorsByBuildingNumber(
+            @Param("activityId") Integer activityId,
+            @Param("buildingNumber") String buildingNumber);
+}
