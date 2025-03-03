@@ -1,6 +1,6 @@
 # 微信云托管优化Dockerfile
 # 更新日期: 2025-03-03
-# 版本: 1.1.2 - 进一步修复生命周期钩子执行问题
+# 版本: 1.1.4 - 修复变量转义问题，增强信号处理，改进日志输出
 
 # 第一阶段：构建阶段
 FROM maven:3.8.6-eclipse-temurin-17-alpine AS builder
@@ -55,81 +55,125 @@ COPY --from=builder /build/target/*.jar /app/app.jar
 COPY --from=builder /build/static/health.json /app/health.json
 
 # 安装必要工具
-RUN apk add --no-cache tzdata curl netcat-openbsd && \
+RUN apk add --no-cache tzdata curl netcat-openbsd procps bash && \
     rm -rf /var/cache/apk/*
 
 # 设置时区为上海
 RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     echo "Asia/Shanghai" > /etc/timezone
 
+# 创建日志目录
+RUN mkdir -p /app/logs
+
 # 创建微信云托管所需的cert目录和初始化脚本
-# 注意：修复脚本缩进问题，确保shell脚本格式正确
 RUN mkdir -p /app/cert && \
-    echo '#!/bin/sh\necho "Initializing environment..."\n\
-    # 这个脚本会在容器启动过程中被执行\n\
-    # 我们确保它总是成功退出，不会影响容器启动\n\
-    touch /app/cert/init.lock\n\
-    echo "Initialization completed successfully."\n\
-    exit 0' > /app/cert/initenv.sh && \
+    echo '#!/bin/bash' > /app/cert/initenv.sh && \
+    echo 'echo "[$(date "+%Y-%m-%d %H:%M:%S")] Initializing environment..." | tee -a /app/logs/init.log' >> /app/cert/initenv.sh && \
+    echo '# 这个脚本会在容器启动过程中被执行' >> /app/cert/initenv.sh && \
+    echo '# 我们确保它总是成功退出，不会影响容器启动' >> /app/cert/initenv.sh && \
+    echo 'touch /app/cert/init.lock' >> /app/cert/initenv.sh && \
+    echo 'echo "[$(date "+%Y-%m-%d %H:%M:%S")] Initialization completed successfully." | tee -a /app/logs/init.log' >> /app/cert/initenv.sh && \
+    echo 'exit 0' >> /app/cert/initenv.sh && \
     chmod +x /app/cert/initenv.sh
 
 # 创建启动脚本
-RUN echo '#!/bin/sh\n\
-    # 确保容器不会因为任何命令失败而退出\n\
-    set -e\n\
-    \n\
-    echo "Starting application..."\n\
-    \n\
-    # 创建一个标记文件，表示容器已经开始启动\n\
-    touch /app/container_starting\n\
-    \n\
-    # 提供一个简单的静态健康检查响应，直到应用完全启动\n\
-    (while true; do { echo -e "HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\n\\r\\n$(cat /app/health.json)"; } | nc -l -p 8080; done) &\n\
-    NC_PID=$!\n\
-    \n\
-    # 启动Java应用\n\
-    java -Duser.timezone=Asia/Shanghai -Xms512m -Xmx1g -jar /app/app.jar --server.port=8080 --management.endpoints.web.exposure.include=health --management.endpoint.health.show-details=always &\n\
-    JAVA_PID=$!\n\
-    \n\
-    # 等待Java应用完全启动(最多等待90秒)\n\
-    echo "Waiting for application to start..."\n\
-    for i in $(seq 1 90); do\n\
-    sleep 1\n\
-    # 检查应用是否在8080端口上监听\n\
-    if nc -z localhost 8080; then\n\
-    # 应用已启动，等待5秒确保它稳定运行\n\
-    sleep 5\n\
-    # 终止临时的netcat服务\n\
-    kill $NC_PID || true\n\
-    echo "Application started successfully."\n\
-    # 创建一个标记文件，表示应用已经成功启动\n\
-    touch /app/app_started\n\
-    break\n\
-    fi\n\
-    echo "Waiting... $i/90 seconds"\n\
-    done\n\
-    \n\
-    # 即使应用未能在指定时间内启动，也创建标记文件\n\
-    if [ ! -f /app/app_started ]; then\n\
-    echo "WARNING: Application failed to start within the expected time, but container will continue running."\n\
-    touch /app/app_started_with_warning\n\
-    fi\n\
-    \n\
-    # 创建一个无限循环，确保容器始终保持运行状态\n\
-    while true; do\n\
-    # 检查Java进程是否仍在运行\n\
-    if kill -0 $JAVA_PID 2>/dev/null; then\n\
-    # Java进程仍在运行，等待一段时间后再次检查\n\
-    sleep 10\n\
-    else\n\
-    # Java进程已经退出，记录错误并尝试重启\n\
-    echo "Java process exited unexpectedly. Attempting to restart..."\n\
-    java -Duser.timezone=Asia/Shanghai -Xms512m -Xmx1g -jar /app/app.jar --server.port=8080 --management.endpoints.web.exposure.include=health --management.endpoint.health.show-details=always &\n\
-    JAVA_PID=$!\n\
-    echo "Java process restarted with PID: $JAVA_PID"\n\
-    fi\n\
-    done\n\
-    ' > /app/start.sh && chmod +x /app/start.sh
+RUN echo '#!/bin/bash' > /app/start.sh && \
+    echo '# 确保容器不会因为任何命令失败而退出' >> /app/start.sh && \
+    echo 'set -e' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo '# 创建日志文件' >> /app/start.sh && \
+    echo 'LOG_FILE="/app/logs/app.log"' >> /app/start.sh && \
+    echo 'touch $LOG_FILE' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo 'log() {' >> /app/start.sh && \
+    echo '  local timestamp=$(date "+%Y-%m-%d %H:%M:%S")' >> /app/start.sh && \
+    echo '  echo "[$timestamp] $1" | tee -a $LOG_FILE' >> /app/start.sh && \
+    echo '}' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo 'log "Starting application..."' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo '# 创建一个标记文件，表示容器已经开始启动' >> /app/start.sh && \
+    echo 'touch /app/container_starting' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo '# 处理信号' >> /app/start.sh && \
+    echo 'cleanup() {' >> /app/start.sh && \
+    echo '  log "Received termination signal. Cleaning up..."' >> /app/start.sh && \
+    echo '  # 终止所有子进程' >> /app/start.sh && \
+    echo '  if [ -n "$NC_PID" ]; then' >> /app/start.sh && \
+    echo '    kill $NC_PID 2>/dev/null || true' >> /app/start.sh && \
+    echo '  fi' >> /app/start.sh && \
+    echo '  if [ -n "$JAVA_PID" ]; then' >> /app/start.sh && \
+    echo '    kill $JAVA_PID 2>/dev/null || true' >> /app/start.sh && \
+    echo '  fi' >> /app/start.sh && \
+    echo '  log "Cleanup completed. Exiting."' >> /app/start.sh && \
+    echo '  exit 0' >> /app/start.sh && \
+    echo '}' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo '# 注册信号处理函数' >> /app/start.sh && \
+    echo 'trap cleanup SIGTERM SIGINT' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo '# 提供一个简单的静态健康检查响应，直到应用完全启动' >> /app/start.sh && \
+    echo 'log "Starting temporary health check service on port 8080"' >> /app/start.sh && \
+    echo '(while true; do { echo -e "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n$(cat /app/health.json)"; } | nc -l -p 8080; done) &' >> /app/start.sh && \
+    echo 'NC_PID=$!' >> /app/start.sh && \
+    echo 'log "Temporary health check service started with PID: $NC_PID"' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo '# 启动Java应用' >> /app/start.sh && \
+    echo 'log "Starting Java application..."' >> /app/start.sh && \
+    echo 'java -Duser.timezone=Asia/Shanghai -Xms512m -Xmx1g -jar /app/app.jar --server.port=8080 --management.endpoints.web.exposure.include=health --management.endpoint.health.show-details=always > >(tee -a $LOG_FILE) 2>&1 &' >> /app/start.sh && \
+    echo 'JAVA_PID=$!' >> /app/start.sh && \
+    echo 'log "Java application started with PID: $JAVA_PID"' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo '# 等待Java应用完全启动(最多等待90秒)' >> /app/start.sh && \
+    echo 'log "Waiting for application to start..."' >> /app/start.sh && \
+    echo 'for i in $(seq 1 90); do' >> /app/start.sh && \
+    echo '  sleep 1' >> /app/start.sh && \
+    echo '  # 检查应用是否在8080端口上监听' >> /app/start.sh && \
+    echo '  if nc -z localhost 8080; then' >> /app/start.sh && \
+    echo '    # 尝试访问健康检查端点' >> /app/start.sh && \
+    echo '    HEALTH_RESPONSE=$(curl -s http://localhost:8080/api/health 2>/dev/null || echo "")' >> /app/start.sh && \
+    echo '    if [[ "$HEALTH_RESPONSE" == *"UP"* ]]; then' >> /app/start.sh && \
+    echo '      # 应用已启动，等待5秒确保它稳定运行' >> /app/start.sh && \
+    echo '      sleep 5' >> /app/start.sh && \
+    echo '      # 终止临时的netcat服务' >> /app/start.sh && \
+    echo '      if [ -n "$NC_PID" ]; then' >> /app/start.sh && \
+    echo '        kill $NC_PID 2>/dev/null || true' >> /app/start.sh && \
+    echo '        log "Terminated temporary health check service"' >> /app/start.sh && \
+    echo '      fi' >> /app/start.sh && \
+    echo '      log "Application started successfully."' >> /app/start.sh && \
+    echo '      # 创建一个标记文件，表示应用已经成功启动' >> /app/start.sh && \
+    echo '      touch /app/app_started' >> /app/start.sh && \
+    echo '      break' >> /app/start.sh && \
+    echo '    else' >> /app/start.sh && \
+    echo '      log "Port 8080 is open but health check not yet responding properly"' >> /app/start.sh && \
+    echo '    fi' >> /app/start.sh && \
+    echo '  fi' >> /app/start.sh && \
+    echo '  if [ $((i % 10)) -eq 0 ]; then' >> /app/start.sh && \
+    echo '    log "Still waiting... $i/90 seconds"' >> /app/start.sh && \
+    echo '  fi' >> /app/start.sh && \
+    echo 'done' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo '# 即使应用未能在指定时间内启动，也创建标记文件' >> /app/start.sh && \
+    echo 'if [ ! -f /app/app_started ]; then' >> /app/start.sh && \
+    echo '  log "WARNING: Application failed to start within the expected time, but container will continue running."' >> /app/start.sh && \
+    echo '  touch /app/app_started_with_warning' >> /app/start.sh && \
+    echo 'fi' >> /app/start.sh && \
+    echo '' >> /app/start.sh && \
+    echo '# 创建一个无限循环，确保容器始终保持运行状态' >> /app/start.sh && \
+    echo 'while true; do' >> /app/start.sh && \
+    echo '  # 检查Java进程是否仍在运行' >> /app/start.sh && \
+    echo '  if kill -0 $JAVA_PID 2>/dev/null; then' >> /app/start.sh && \
+    echo '    # Java进程仍在运行，等待一段时间后再次检查' >> /app/start.sh && \
+    echo '    sleep 30' >> /app/start.sh && \
+    echo '  else' >> /app/start.sh && \
+    echo '    # Java进程已经退出，记录错误并尝试重启' >> /app/start.sh && \
+    echo '    log "Java process exited unexpectedly. Attempting to restart..."' >> /app/start.sh && \
+    echo '    java -Duser.timezone=Asia/Shanghai -Xms512m -Xmx1g -jar /app/app.jar --server.port=8080 --management.endpoints.web.exposure.include=health --management.endpoint.health.show-details=always > >(tee -a $LOG_FILE) 2>&1 &' >> /app/start.sh && \
+    echo '    JAVA_PID=$!' >> /app/start.sh && \
+    echo '    log "Java process restarted with PID: $JAVA_PID"' >> /app/start.sh && \
+    echo '  fi' >> /app/start.sh && \
+    echo 'done' >> /app/start.sh && \
+    chmod +x /app/start.sh
 
 # 设置端口环境变量
 ENV PORT=8080
@@ -139,7 +183,7 @@ EXPOSE ${PORT}
 
 # 添加健康检查，确保容器正常运行
 HEALTHCHECK --interval=30s --timeout=15s --start-period=120s --retries=3 \
-    CMD curl -f http://localhost:${PORT}/api/health || exit 1
+    CMD curl -s -f http://localhost:${PORT}/api/health || exit 1
 
 # 启动应用
 CMD ["/app/start.sh"]
