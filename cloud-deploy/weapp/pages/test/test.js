@@ -6,7 +6,7 @@ const config = require('../../config');
 Page({
     data: {
         // 基础数据
-        title: '小程序组件测试',
+        title: '微信小程序测试页面',
         loading: false,
 
         // 表单数据
@@ -14,14 +14,18 @@ Page({
             name: '',
             phone: '',
             address: '',
-            date: '2023-01-01',
+            date: '2023-11-09',
             time: '12:00',
-            region: ['广东省', '广州市', '海珠区'],
+            region: ['北京市', '北京市', '朝阳区'],
             switch: false
         },
 
         // 列表数据
-        listData: [],
+        listData: [
+            { id: 1, title: '测试项目1', desc: '这是第一个测试项目的描述', time: '2023-11-09 10:00' },
+            { id: 2, title: '测试项目2', desc: '这是第二个测试项目的描述', time: '2023-11-09 11:00' },
+            { id: 3, title: '测试项目3', desc: '这是第三个测试项目的描述', time: '2023-11-09 12:00' }
+        ],
 
         // 选择器数据
         pickerItems: ['选项1', '选项2', '选项3', '选项4', '选项5'],
@@ -35,37 +39,19 @@ Page({
         testSuccess: false
     },
 
-    onLoad: function () {
-        // 初始化测试数据
-        this.initTestData();
-
-        // 打印调试信息
-        console.log('[DEBUG] 测试页面加载完成');
-    },
-
-    // 初始化测试数据
-    initTestData: function () {
-        // 生成测试列表数据
-        const listData = [];
-        for (let i = 1; i <= 10; i++) {
-            listData.push({
-                id: i,
-                title: `测试项目 ${i}`,
-                desc: `这是测试项目 ${i} 的描述信息`,
-                time: new Date().toLocaleString()
-            });
-        }
-
-        this.setData({
-            listData,
-            testResult: '测试页面初始化完成'
+    onLoad: function (options) {
+        console.log('测试页面加载');
+        wx.showToast({
+            title: '测试页面已加载',
+            icon: 'success',
+            duration: 2000
         });
     },
 
     // 表单输入处理
     onInput: function (e) {
-        const { field } = e.currentTarget.dataset;
-        const { value } = e.detail;
+        const field = e.currentTarget.dataset.field;
+        const value = e.detail.value;
 
         this.setData({
             [`formData.${field}`]: value
@@ -121,27 +107,22 @@ Page({
 
     // 选择图片
     chooseImage: function () {
-        const that = this;
-        wx.chooseMedia({
-            count: 9,
-            mediaType: ['image'],
+        wx.chooseImage({
+            count: 9 - this.data.imageList.length,
+            sizeType: ['compressed'],
             sourceType: ['album', 'camera'],
-            success: function (res) {
-                const tempFiles = res.tempFiles;
-                const imageList = tempFiles.map(file => file.tempFilePath);
-
-                that.setData({
-                    imageList: [...that.data.imageList, ...imageList]
+            success: (res) => {
+                // 返回选定照片的本地文件路径列表
+                this.setData({
+                    imageList: [...this.data.imageList, ...res.tempFilePaths]
                 });
-
-                console.log(`[DEBUG] 已选择 ${imageList.length} 张图片`);
             }
         });
     },
 
     // 删除图片
     deleteImage: function (e) {
-        const { index } = e.currentTarget.dataset;
+        const index = e.currentTarget.dataset.index;
         const imageList = this.data.imageList;
         imageList.splice(index, 1);
 

@@ -1,27 +1,60 @@
-<!--index.wxml-->
-<scroll-view class="scrollarea" scroll-y type="list">
-  <view class="container">
-    <view class="userinfo">
-      <block wx:if="{{canIUseNicknameComp && !hasUserInfo}}">
-        <button class="avatar-wrapper" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
-          <image class="avatar" src="{{userInfo.avatarUrl}}"></image>
-        </button>
-        <view class="nickname-wrapper">
-          <text class="nickname-label">昵称</text>
-          <input type="nickname" class="nickname-input" placeholder="请输入昵称" bind:change="onInputChange" />
-        </view>
-      </block>
-      <block wx:elif="{{!hasUserInfo}}">
-        <button wx:if="{{canIUseGetUserProfile}}" bindtap="getUserProfile"> 获取头像昵称 </button>
-        <view wx:else> 请使用2.10.4及以上版本基础库 </view>
-      </block>
-      <block wx:else>
-        <image bindtap="bindViewTap" class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
-        <text class="userinfo-nickname">{{userInfo.nickName}}</text>
-      </block>
+<!-- index.wxml -->
+<view class="container">
+  <view class="header">
+    <view class="title">微信云托管测试</view>
+    <view class="subtitle">房产小程序云托管版</view>
+  </view>
+  <view class="card">
+    <view class="card-title">云环境配置</view>
+    <view class="info-item">
+      <text class="label">环境ID:</text>
+      <text class="value">{{cloudEnvId}}</text>
     </view>
-    <view class="usermotto">
-      <text class="user-motto">{{motto}}</text>
+    <view class="info-item">
+      <text class="label">服务名称:</text>
+      <text class="value">{{serviceName}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">API状态:</text>
+      <text class="value status {{apiStatusClass}}">{{apiStatus}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">API调用方式:</text>
+      <view class="value">
+        <switch checked="{{useCloudContainer}}" bindchange="toggleCloudContainer" color="#07c160" />
+        <text>{{useCloudContainer ? '云托管容器调用' : '普通HTTP请求'}}</text>
+      </view>
     </view>
   </view>
-</scroll-view>
+  <view class="card" wx:if="{{count > 0 || testResult}}">
+    <view class="card-title">计数器</view>
+    <view class="info-item" wx:if="{{count > 0}}">
+      <text class="label">当前计数:</text>
+      <text class="value count">{{count}}</text>
+    </view>
+    <view class="result-box" wx:if="{{testResult}}">
+      <text>{{testResult}}</text>
+    </view>
+  </view>
+  <view class="button-container">
+    <button type="primary" bindtap="handleTestApi" class="btn">测试健康检查API</button>
+    <button type="default" bindtap="testCountApi" class="btn">测试计数器API</button>
+    <button type="warn" bindtap="clearCount" class="btn-small" wx:if="{{count > 0}}">清零计数器</button>
+    <button type="primary" bindtap="navigateToTest">进入测试页面</button>
+  </view>
+  <view class="tips-container">
+    <view class="tips-title">常见问题解决方案:</view>
+    <view class="tips-item">
+      <text>1. 域名白名单问题: 在微信公众平台添加云托管域名到request合法域名</text>
+    </view>
+    <view class="tips-item">
+      <text>2. 云托管容器调用: 启用上方开关，使用wx.cloud.callContainer绕过域名限制</text>
+    </view>
+    <view class="tips-item">
+      <text>3. 开发工具设置: 确保勾选"不校验合法域名"选项</text>
+    </view>
+    <view class="tips-item">
+      <text>4. API返回400错误: 系统会自动使用模拟响应，可继续开发</text>
+    </view>
+  </view>
+</view>
