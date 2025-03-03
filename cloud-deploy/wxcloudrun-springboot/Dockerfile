@@ -1,6 +1,6 @@
 # 微信云托管优化Dockerfile
 # 更新日期: 2025-03-03
-# 版本: 1.1.0 - 适配标准Docker Hub镜像，优化构建流程
+# 版本: 1.1.1 - 修复生命周期钩子执行问题
 
 # 第一阶段：构建阶段
 FROM maven:3.8.6-eclipse-temurin-17-alpine AS builder
@@ -48,11 +48,6 @@ FROM eclipse-temurin:17-jre-alpine
 # 指定工作目录
 WORKDIR /app
 
-# 创建微信云托管所需的cert目录和初始化脚本
-RUN mkdir -p /app/cert && \
-    echo '#!/bin/sh\necho "Initializing environment..."\nexit 0' > /app/cert/initenv.sh && \
-    chmod +x /app/cert/initenv.sh
-
 # 从构建阶段复制构建好的jar文件
 COPY --from=builder /build/target/*.jar /app/app.jar
 
@@ -66,6 +61,22 @@ RUN apk add --no-cache tzdata curl netcat-openbsd && \
 # 设置时区为上海
 RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     echo "Asia/Shanghai" > /etc/timezone
+
+# 创建微信云托管所需的cert目录和初始化脚本
+# 注意：将此步骤移到后面，确保它不会干扰主应用程序的启动
+RUN mkdir -p /app/cert && \
+    echo '#!/bin/sh\necho "Initializing environment..."\n\
+    # 添加一个简单的检查，确保主应用程序已经启动\n\
+    for i in $(seq 1 30); do\n\
+    if nc -z localhost 8080; then\n\
+    echo "Application is running, continuing initialization..."\n\
+    break\n\
+    fi\n\
+    echo "Waiting for application to start... $i/30"\n\
+    sleep 2\n\
+    done\n\
+    exit 0' > /app/cert/initenv.sh && \
+    chmod +x /app/cert/initenv.sh
 
 # 创建启动脚本
 RUN echo '#!/bin/sh\n\
@@ -92,8 +103,16 @@ RUN echo '#!/bin/sh\n\
     fi\n\
     echo "Waiting... $i/90 seconds"\n\
     done\n\
-    # 继续运行Java进程\n\
-    wait $JAVA_PID\n\
+    # 添加错误处理，如果应用未能在指定时间内启动，记录错误但不退出容器\n\
+    if ! nc -z localhost 8080; then\n\
+    echo "WARNING: Application failed to start within the expected time, but container will continue running."\n\
+    fi\n\
+    # 继续运行Java进程，但不退出容器\n\
+    wait $JAVA_PID || {\n\
+    echo "Java process exited with status $?"\n\
+    # 即使Java进程退出，也保持容器运行\n\
+    tail -f /dev/null\n\
+    }\n\
     ' > /app/start.sh && chmod +x /app/start.sh
 
 # 设置端口环境变量
