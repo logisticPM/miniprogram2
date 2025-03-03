@@ -1,0 +1,25 @@
+# 排除所有文件
+*
+
+# 仅包含必要文件
+!app/server/pom.xml
+!app/server/src
+
+# 但仍排除src目录中的不必要文件
+app/server/src/**/*.class
+app/server/src/**/*.log
+app/server/src/test/
+
+# 其他目录和文件
+.git
+.github
+.gitignore
+.vscode
+.idea
+app/weapp
+app/miniprogram
+app/panel
+app/cloudfunctions
+**/target/
+**/node_modules/
+**/.DS_Store 

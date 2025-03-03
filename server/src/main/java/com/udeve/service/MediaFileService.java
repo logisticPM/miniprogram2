@@ -15,12 +15,12 @@ package com.udeve.service;
 import com.alibaba.fastjson.JSONObject;
 import com.udeve.request.AdminMediaFIleCreateRequest;
 import com.udeve.request.AdminMediaFIleUpdateRequest;
-import com.udeve.utils.file.UdykUtil;
 import com.udeve.vo.AdminMediaFileListVo;
 import com.udeve.request.MediaFileQueryRequest;
 import com.udeve.vo.PageableInfoVo;
 import com.udeve.entity.MediaFile;
 import com.udeve.utils.JsonResponse;
+import com.udeve.utils.file.FileStorageUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import com.udeve.utils.file.FileStorageUtil;
 
 @Service
 @Slf4j

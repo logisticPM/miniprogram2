@@ -17,8 +17,8 @@ jobs:
           distribution: 'temurin'
           
       - name: Build with Maven
-        run: cd app/server && mvn clean package -DskipTests
+        run: cd cloud-deploy/wxcloudrun-springboot && mvn clean package -DskipTests
         
       # 此步仅用于调试，实际部署由微信云托管自动完成
       - name: List files
-        run: ls -la app/server/target 
+        run: ls -la cloud-deploy/wxcloudrun-springboot/target 
