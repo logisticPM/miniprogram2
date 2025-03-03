@@ -1,0 +1,231 @@
+/* pages/test/test.wxss */
+page {
+    background-color: #f7f7f7;
+}
+
+.container {
+    padding: 20rpx;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+        Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei',
+        sans-serif;
+}
+
+/* 头部样式 */
+.header {
+    margin-bottom: 30rpx;
+    text-align: center;
+    padding: 20rpx 0;
+}
+
+.title {
+    font-size: 40rpx;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10rpx;
+}
+
+.subtitle {
+    font-size: 28rpx;
+    color: #666;
+}
+
+/* 区域通用样式 */
+.nav-section,
+.api-section,
+.form-section,
+.list-section {
+    background-color: #fff;
+    border-radius: 16rpx;
+    padding: 30rpx;
+    margin-bottom: 30rpx;
+    box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+    font-size: 32rpx;
+    font-weight: bold;
+    margin-bottom: 20rpx;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10rpx;
+}
+
+/* 按钮组样式 */
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20rpx;
+    margin-bottom: 20rpx;
+}
+
+/* 结果框样式 */
+.result-box {
+    background-color: #f7f7f7;
+    border-radius: 8rpx;
+    padding: 20rpx;
+    margin-top: 20rpx;
+}
+
+.result-title {
+    font-weight: bold;
+    margin-bottom: 10rpx;
+}
+
+.success {
+    color: #07c160;
+}
+
+.error {
+    color: #fa5151;
+}
+
+/* 表单样式 */
+.form-item {
+    margin-bottom: 30rpx;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 10rpx;
+    font-size: 28rpx;
+    color: #666;
+}
+
+.form-input {
+    width: 100%;
+    height: 80rpx;
+    border: 1px solid #ddd;
+    border-radius: 8rpx;
+    padding: 0 20rpx;
+    box-sizing: border-box;
+    font-size: 28rpx;
+}
+
+.form-textarea {
+    width: 100%;
+    height: 160rpx;
+    border: 1px solid #ddd;
+    border-radius: 8rpx;
+    padding: 20rpx;
+    box-sizing: border-box;
+    font-size: 28rpx;
+}
+
+/* 选择器样式 */
+.picker-view {
+    width: 100%;
+    height: 80rpx;
+    border: 1px solid #ddd;
+    border-radius: 8rpx;
+    padding: 0 20rpx;
+    box-sizing: border-box;
+    font-size: 28rpx;
+    display: flex;
+    align-items: center;
+}
+
+/* 图片选择器样式 */
+.image-picker {
+    margin-top: 10rpx;
+}
+
+.image-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20rpx;
+}
+
+.image-item {
+    width: 160rpx;
+    height: 160rpx;
+    position: relative;
+}
+
+.image-item image {
+    width: 100%;
+    height: 100%;
+    border-radius: 8rpx;
+}
+
+.delete-btn {
+    position: absolute;
+    top: -20rpx;
+    right: -20rpx;
+    width: 40rpx;
+    height: 40rpx;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28rpx;
+}
+
+.add-image {
+    width: 160rpx;
+    height: 160rpx;
+    border: 1px dashed #ddd;
+    border-radius: 8rpx;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #999;
+    font-size: 60rpx;
+}
+
+/* 列表样式 */
+.list-container {
+    margin-top: 20rpx;
+}
+
+.list-item {
+    padding: 20rpx;
+    border-bottom: 1px solid #eee;
+}
+
+.list-item:last-child {
+    border-bottom: none;
+}
+
+.list-item-title {
+    font-size: 32rpx;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10rpx;
+}
+
+.list-item-desc {
+    font-size: 28rpx;
+    color: #666;
+    margin-bottom: 10rpx;
+}
+
+.list-item-time {
+    font-size: 24rpx;
+    color: #999;
+}
+
+/* 底部样式 */
+.footer {
+    text-align: center;
+    padding: 30rpx 0;
+    color: #999;
+    font-size: 24rpx;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20rpx;
+}
+
+.share-btn {
+    background-color: transparent;
+    color: #07c160;
+    font-size: 24rpx;
+    padding: 0;
+    line-height: 1.5;
+}
+
+.share-btn::after {
+    border: none;
+}
