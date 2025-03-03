@@ -11,6 +11,11 @@ public class ActivityRequest {
     private String startTime;
     private String endTime;
     private String password;
+    private String adminPassword;
+    private String buildingNumber;
+    private Integer unitCount;
+    private Integer floorCount;
+    private List<String> houseTypes;
     private Map<String, Object> buildingInfo;
     private List<Map<String, Object>> rooms;
 
@@ -44,6 +49,46 @@ public class ActivityRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getAdminPassword() {
+        return adminPassword;
+    }
+
+    public void setAdminPassword(String adminPassword) {
+        this.adminPassword = adminPassword;
+    }
+
+    public String getBuildingNumber() {
+        return buildingNumber;
+    }
+
+    public void setBuildingNumber(String buildingNumber) {
+        this.buildingNumber = buildingNumber;
+    }
+
+    public Integer getUnitCount() {
+        return unitCount;
+    }
+
+    public void setUnitCount(Integer unitCount) {
+        this.unitCount = unitCount;
+    }
+
+    public Integer getFloorCount() {
+        return floorCount;
+    }
+
+    public void setFloorCount(Integer floorCount) {
+        this.floorCount = floorCount;
+    }
+
+    public List<String> getHouseTypes() {
+        return houseTypes;
+    }
+
+    public void setHouseTypes(List<String> houseTypes) {
+        this.houseTypes = houseTypes;
     }
 
     public Map<String, Object> getBuildingInfo() {

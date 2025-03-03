@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,8 +67,8 @@ public class ActivityController {
             // 创建活动
             Activity activity = new Activity();
             activity.setTitle(request.getTitle());
-            activity.setStartTime(request.getStartTime());
-            activity.setEndTime(request.getEndTime());
+            activity.setStartTime(LocalDateTime.parse(request.getStartTime()));
+            activity.setEndTime(LocalDateTime.parse(request.getEndTime()));
             activity.setPassword(request.getPassword());
             activity.setBuildingNumber(request.getBuildingNumber());
             activity.setUnitCount(request.getUnitCount());
