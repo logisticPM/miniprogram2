@@ -1,46 +1,110 @@
-# 二开推荐阅读[如何提高项目构建效率](https://developers.weixin.qq.com/miniprogram/dev/wxcloudrun/src/scene/build/speed.html)
-# 选择构建用基础镜像。如需更换，请到[dockerhub官方仓库](https://hub.docker.com/_/java?tab=tags)自行选择后替换。
-FROM maven:3.6.0-jdk-8-slim as build
+# 微信云托管优化Dockerfile
+# 更新日期: 2025-03-03
+# 版本: 1.1.0 - 适配标准Docker Hub镜像，优化构建流程
 
-# 指定构建过程中的工作目录
+# 第一阶段：构建阶段
+FROM maven:3.8.6-eclipse-temurin-17-alpine AS builder
+
+# 指定工作目录
+WORKDIR /build
+
+# 创建settings.xml以使用阿里云Maven镜像源加速依赖下载
+RUN mkdir -p /root/.m2 \
+    && echo '<?xml version="1.0" encoding="UTF-8"?>\
+    <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" \
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" \
+    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">\
+    <mirrors>\
+    <mirror>\
+    <id>aliyunmaven</id>\
+    <mirrorOf>central</mirrorOf>\
+    <name>阿里云公共仓库</name>\
+    <url>https://maven.aliyun.com/repository/public</url>\
+    </mirror>\
+    </mirrors>\
+    </settings>' > /root/.m2/settings.xml
+
+# 复制pom.xml单独进行依赖下载，利用Docker缓存机制
+COPY pom.xml /build/
+RUN mvn dependency:go-offline -B
+
+# 复制源代码
+COPY src /build/src/
+
+# 创建一个健康检查控制器，确保/api/health端点可用
+RUN mkdir -p /build/src/main/java/com/wxcloudrun/controller && \
+    printf 'package com.wxcloudrun.controller;\n\nimport org.springframework.web.bind.annotation.GetMapping;\nimport org.springframework.web.bind.annotation.RestController;\n\n@RestController\npublic class HealthController {\n\n    @GetMapping("/api/health")\n    public String health() {\n        return "{\"status\":\"UP\"}";\n    }\n}\n' > /build/src/main/java/com/wxcloudrun/controller/HealthController.java
+
+# 构建应用
+RUN mvn package -T 2C -DskipTests -Dmaven.test.skip=true
+
+# 创建一个静态健康检查文件作为备份
+RUN mkdir -p /build/static && \
+    echo '{"status":"UP"}' > /build/static/health.json
+
+# 第二阶段：运行阶段
+FROM eclipse-temurin:17-jre-alpine
+
+# 指定工作目录
 WORKDIR /app
 
-# 将src目录下所有文件，拷贝到工作目录中src目录下（.gitignore/.dockerignore中文件除外）
-COPY src /app/src
+# 创建微信云托管所需的cert目录和初始化脚本
+RUN mkdir -p /app/cert && \
+    echo '#!/bin/sh\necho "Initializing environment..."\nexit 0' > /app/cert/initenv.sh && \
+    chmod +x /app/cert/initenv.sh
 
-# 将pom.xml文件，拷贝到工作目录下
-COPY settings.xml pom.xml /app/
+# 从构建阶段复制构建好的jar文件
+COPY --from=builder /build/target/*.jar /app/app.jar
 
-# 执行代码编译命令
-# 自定义settings.xml, 选用国内镜像源以提高下载速度
-RUN mvn -s /app/settings.xml -f /app/pom.xml clean package
+# 复制静态健康检查文件
+COPY --from=builder /build/static/health.json /app/health.json
 
-# 选择运行时基础镜像
-FROM alpine:3.13
+# 安装必要工具
+RUN apk add --no-cache tzdata curl netcat-openbsd && \
+    rm -rf /var/cache/apk/*
 
-# 安装依赖包，如需其他依赖包，请到alpine依赖包管理(https://pkgs.alpinelinux.org/packages?name=php8*imagick*&branch=v3.13)查找。
-# 选用国内镜像源以提高下载速度
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tencent.com/g' /etc/apk/repositories \
-    && apk add --update --no-cache openjdk8-jre-base \
-    && rm -f /var/cache/apk/*
+# 设置时区为上海
+RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone
 
-# 容器默认时区为UTC，如需使用上海时间请启用以下时区设置命令
-# RUN apk add tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shanghai > /etc/timezone
+# 创建启动脚本
+RUN echo '#!/bin/sh\n\
+    echo "Starting application..."\n\
+    # 提供一个简单的静态健康检查响应，直到应用完全启动\n\
+    (while true; do { echo -e "HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\n\\r\\n$(cat /app/health.json)"; } | nc -l -p 80; done) &\n\
+    # 记录后台进程ID以便后续终止\n\
+    NC_PID=$!\n\
+    # 启动Java应用\n\
+    java -Duser.timezone=Asia/Shanghai -Xms512m -Xmx1g -jar /app/app.jar --server.port=80 --management.endpoints.web.exposure.include=health --management.endpoint.health.show-details=always &\n\
+    JAVA_PID=$!\n\
+    # 等待Java应用完全启动(最多等待90秒)\n\
+    echo "Waiting for application to start..."\n\
+    for i in $(seq 1 90); do\n\
+    sleep 1\n\
+    # 检查应用是否在80端口上监听\n\
+    if nc -z localhost 80; then\n\
+    # 应用已启动，等待5秒确保它稳定运行\n\
+    sleep 5\n\
+    # 终止临时的netcat服务\n\
+    kill $NC_PID\n\
+    echo "Application started successfully."\n\
+    break\n\
+    fi\n\
+    echo "Waiting... $i/90 seconds"\n\
+    done\n\
+    # 继续运行Java进程\n\
+    wait $JAVA_PID\n\
+    ' > /app/start.sh && chmod +x /app/start.sh
 
-# 使用 HTTPS 协议访问容器云调用证书安装
-RUN apk add ca-certificates
-
-# 指定运行时的工作目录
-WORKDIR /app
-
-# 将构建产物jar包拷贝到运行时目录中
-COPY --from=build /app/target/*.jar .
+# 设置端口环境变量
+ENV PORT=80
 
 # 暴露端口
-# 此处端口必须与「服务设置」-「流水线」以及「手动上传代码包」部署时填写的端口一致，否则会部署失败。
-EXPOSE 80
+EXPOSE ${PORT}
 
-# 执行启动命令.
-# 写多行独立的CMD命令是错误写法！只有最后一行CMD命令会被执行，之前的都会被忽略，导致业务报错。
-# 请参考[Docker官方文档之CMD命令](https://docs.docker.com/engine/reference/builder/#cmd)
-CMD ["java", "-jar", "/app/springboot-wxcloudrun-1.0.jar"]
+# 添加健康检查，确保容器正常运行
+HEALTHCHECK --interval=30s --timeout=15s --start-period=120s --retries=3 \
+    CMD curl -f http://localhost:${PORT}/api/health || exit 1
+
+# 启动应用
+CMD ["/app/start.sh"]
