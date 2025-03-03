@@ -26,7 +26,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public Optional<Activity> getActivityById(Integer id) {
-        return Optional.ofNullable(activityMapper.getActivityById(id));
+        return activityMapper.getActivityById(id);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public List<Activity> getActiveActivities() {
-        return activityMapper.getActiveActivities();
+        return activityMapper.getActivitiesByStatus("active");
     }
 
     @Override

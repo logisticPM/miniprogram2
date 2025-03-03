@@ -37,10 +37,24 @@ public interface ActivityMapper {
     List<Activity> getAllActivities();
 
     /**
+     * 获取所有活跃状态的活动
+     * @return 活动列表
+     */
+    List<Activity> getActiveActivities();
+
+    /**
      * 更新活动
      * @param activity 活动对象
      */
     void updateActivity(Activity activity);
+
+    /**
+     * 更新活动状态
+     * @param id 活动ID
+     * @param status 状态
+     * @return 更新的行数
+     */
+    int updateActivityStatus(@Param("id") Integer id, @Param("status") String status);
 
     /**
      * 根据密码获取活动

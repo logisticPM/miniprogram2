@@ -26,7 +26,7 @@ public interface RoomService {
      * @param id 房间ID
      * @return 房间信息
      */
-    Optional<Room> getRoomById(Integer id);
+    Room getRoomById(Integer id);
 
     /**
      * 根据活动ID获取房间列表

@@ -35,8 +35,8 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public Optional<Room> getRoomById(Integer id) {
-        return Optional.ofNullable(roomMapper.getRoomById(id));
+    public Room getRoomById(Integer id) {
+        return roomMapper.getRoomById(id);
     }
 
     @Override

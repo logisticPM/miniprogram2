@@ -5,7 +5,6 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
-import java.util.Optional;
 
 @Mapper
 public interface RoomMapper {
@@ -19,15 +18,16 @@ public interface RoomMapper {
     /**
      * 批量创建房间
      * @param rooms 房间列表
+     * @return 创建的行数
      */
-    void batchCreateRooms(List<Room> rooms);
+    int batchCreateRooms(List<Room> rooms);
 
     /**
      * 根据ID获取房间
      * @param id 房间ID
      * @return 房间对象
      */
-    Optional<Room> getRoomById(@Param("id") Integer id);
+    Room getRoomById(@Param("id") Integer id);
 
     /**
      * 根据活动ID获取房间列表
