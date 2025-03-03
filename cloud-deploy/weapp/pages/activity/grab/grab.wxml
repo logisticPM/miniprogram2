@@ -1,0 +1,119 @@
+<view class="container">
+    <view class="header">
+        <view class="title">{{activity.title || '房源抢购'}}</view>
+        <view class="subtitle" wx:if="{{activity}}">
+            活动时间：{{activity.startTime}} 至 {{activity.endTime}}
+        </view>
+    </view>
+    <!-- 加载中 -->
+    <view class="loading-container" wx:if="{{loading}}">
+        <view class="loading"></view>
+        <view class="loading-text">加载中...</view>
+    </view>
+    <!-- 错误提示 -->
+    <view class="error-container" wx:if="{{errorMsg && !loading}}">
+        <icon type="warn" size="64"></icon>
+        <view class="error-text">{{errorMsg}}</view>
+        <button class="btn btn-primary" bindtap="backToList">返回活动列表</button>
+    </view>
+    <!-- 密码验证 -->
+    <view class="password-container" wx:if="{{!loading && !errorMsg && !selectedBuilding && !grabResult}}">
+        <view class="section-title">请输入抢房密码</view>
+        <view class="form-item">
+            <input class="form-input" type="password" placeholder="请输入抢房密码" value="{{password}}" bindinput="onInputChange" data-field="password" />
+        </view>
+        <button class="btn btn-primary" bindtap="verifyPassword" loading="{{submitting}}">
+            验证密码
+        </button>
+    </view>
+    <!-- 抢房界面 -->
+    <block wx:if="{{!loading && !errorMsg && selectedBuilding && !grabResult}}">
+        <!-- 楼栋选择 -->
+        <view class="section">
+            <view class="section-title">选择楼栋</view>
+            <view class="building-list">
+                <view wx:for="{{buildings}}" wx:key="index" class="building-item {{selectedBuilding === item ? 'selected' : ''}}" bindtap="selectBuilding" data-building="{{item}}">
+                    {{item}}
+                </view>
+            </view>
+        </view>
+        <!-- 楼层选择 -->
+        <view class="section" wx:if="{{floors.length > 0}}">
+            <view class="section-title">选择楼层</view>
+            <view class="floor-list">
+                <view wx:for="{{floors}}" wx:key="index" class="floor-item {{selectedFloor === item ? 'selected' : ''}}" bindtap="selectFloor" data-floor="{{item}}">
+                    {{item}}
+                </view>
+            </view>
+        </view>
+        <!-- 房间选择 -->
+        <view class="section" wx:if="{{rooms.length > 0}}">
+            <view class="section-title">选择房间</view>
+            <view class="room-list">
+                <view wx:for="{{rooms}}" wx:key="id" class="room-item {{item.status === 'sold' ? 'sold' : ''}} {{selectedRooms.findIndex(r => r.id === item.id) !== -1 ? 'selected' : ''}}" bindtap="toggleRoomSelection" data-id="{{item.id}}">
+                    <view class="room-number">{{item.number}}室</view>
+                    <view class="room-info">
+                        <text>{{item.type}}</text>
+                        <text>{{item.area}}</text>
+                    </view>
+                    <view class="room-price">{{item.price}}</view>
+                    <view class="room-status">
+                        <text wx:if="{{item.status === 'sold'}}">已售</text>
+                        <text wx:else>可选</text>
+                    </view>
+                </view>
+            </view>
+        </view>
+        <!-- 已选房间 -->
+        <view class="section" wx:if="{{selectedRooms.length > 0}}">
+            <view class="section-title">已选房间 ({{selectedRooms.length}})</view>
+            <view class="selected-rooms">
+                <view wx:for="{{selectedRooms}}" wx:key="id" class="selected-room-item">
+                    <view class="selected-room-info">
+                        <text>{{item.number}}室</text>
+                        <text>{{item.type}}</text>
+                        <text>{{item.area}}</text>
+                        <text>{{item.price}}</text>
+                    </view>
+                    <view class="selected-room-action" catchtap="toggleRoomSelection" data-id="{{item.id}}">
+                        <icon type="clear" size="20"></icon>
+                    </view>
+                </view>
+            </view>
+        </view>
+        <!-- 提交按钮 -->
+        <view class="button-group">
+            <button class="btn btn-primary" bindtap="submitGrab" loading="{{submitting}}" disabled="{{selectedRooms.length === 0}}">
+                提交抢房 (已选{{selectedRooms.length}}间)
+            </button>
+        </view>
+    </block>
+    <!-- 抢房结果 -->
+    <view class="result-container" wx:if="{{grabResult}}">
+        <view class="result-icon {{grabSuccess ? 'success' : 'fail'}}">
+            <icon type="{{grabSuccess ? 'success' : 'warn'}}" size="64"></icon>
+        </view>
+        <view class="result-title">{{grabSuccess ? '抢房成功' : '抢房失败'}}</view>
+        <view class="result-message">{{grabResult.message}}</view>
+        <!-- 成功结果详情 -->
+        <view class="result-details" wx:if="{{grabSuccess && grabResult.rooms}}">
+            <view class="section-title">抢房详情</view>
+            <view class="result-rooms">
+                <view wx:for="{{grabResult.rooms}}" wx:key="id" class="result-room-item">
+                    <view class="result-room-number">{{item.number}}室</view>
+                    <view class="result-room-info">
+                        <text>{{item.type}}</text>
+                        <text>{{item.area}}</text>
+                        <text>{{item.price}}</text>
+                    </view>
+                    <view class="result-room-time">抢房时间: {{item.grabTime}}</view>
+                </view>
+            </view>
+        </view>
+        <!-- 结果操作按钮 -->
+        <view class="button-group">
+            <button class="btn btn-secondary" bindtap="backToList">返回活动列表</button>
+            <button class="btn btn-primary" bindtap="viewMyRecords">查看我的抢房记录</button>
+        </view>
+    </view>
+</view>

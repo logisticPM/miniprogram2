@@ -1,0 +1,120 @@
+<view class="container">
+    <view class="header">
+        <view class="title">创建抢房活动</view>
+        <view class="subtitle">请填写活动信息</view>
+    </view>
+    <view class="steps">
+        <view wx:for="{{steps}}" wx:key="index" class="step {{currentStep >= index ? 'active' : ''}}">
+            <view class="step-number">{{index + 1}}</view>
+            <view class="step-text">{{item}}</view>
+        </view>
+    </view>
+    <!-- 步骤1：基本信息 -->
+    <view class="form-section" hidden="{{currentStep !== 0}}">
+        <view class="section-title">基本信息</view>
+        <view class="form-item">
+            <view class="form-label">活动标题</view>
+            <input class="form-input" placeholder="请输入活动标题" value="{{formData.title}}" bindinput="onInputChange" data-field="title" />
+        </view>
+        <view class="form-item">
+            <view class="form-label">开始时间</view>
+            <view class="date-time-picker">
+                <picker mode="date" value="{{startDate}}" start="{{startDate}}" bindchange="onDateChange" data-field="startDate">
+                    <view class="picker-item">
+                        <text>{{startDate}}</text>
+                        <text class="picker-arrow">▼</text>
+                    </view>
+                </picker>
+                <picker mode="time" value="{{startTime}}" bindchange="onTimeChange" data-field="startTime">
+                    <view class="picker-item">
+                        <text>{{startTime}}</text>
+                        <text class="picker-arrow">▼</text>
+                    </view>
+                </picker>
+            </view>
+        </view>
+        <view class="form-item">
+            <view class="form-label">结束时间</view>
+            <view class="date-time-picker">
+                <picker mode="date" value="{{endDate}}" start="{{startDate}}" bindchange="onDateChange" data-field="endDate">
+                    <view class="picker-item">
+                        <text>{{endDate}}</text>
+                        <text class="picker-arrow">▼</text>
+                    </view>
+                </picker>
+                <picker mode="time" value="{{endTime}}" bindchange="onTimeChange" data-field="endTime">
+                    <view class="picker-item">
+                        <text>{{endTime}}</text>
+                        <text class="picker-arrow">▼</text>
+                    </view>
+                </picker>
+            </view>
+        </view>
+    </view>
+    <!-- 步骤2：楼栋信息 -->
+    <view class="form-section" hidden="{{currentStep !== 1}}">
+        <view class="section-title">楼栋信息</view>
+        <view class="form-item">
+            <view class="form-label">楼号</view>
+            <input class="form-input" placeholder="请输入楼号，如：1号楼" value="{{formData.buildingNumber}}" bindinput="onInputChange" data-field="buildingNumber" />
+        </view>
+        <view class="form-item">
+            <view class="form-label">单元数量</view>
+            <picker range="{{unitCountArray}}" bindchange="onUnitCountChange">
+                <view class="picker-item full-width">
+                    <text>{{formData.unitCount}}单元</text>
+                    <text class="picker-arrow">▼</text>
+                </view>
+            </picker>
+        </view>
+        <view class="form-item">
+            <view class="form-label">楼层数量</view>
+            <picker range="{{floorCountArray}}" bindchange="onFloorCountChange">
+                <view class="picker-item full-width">
+                    <text>{{formData.floorCount}}层</text>
+                    <text class="picker-arrow">▼</text>
+                </view>
+            </picker>
+        </view>
+        <view class="form-item">
+            <view class="form-label">户型选择（可多选）</view>
+            <view class="house-types">
+                <view wx:for="{{formData.houseTypes}}" wx:key="name" class="house-type {{item.selected ? 'selected' : ''}}" bindtap="toggleHouseType" data-index="{{index}}">
+                    {{item.name}}
+                </view>
+            </view>
+        </view>
+    </view>
+    <!-- 步骤3：密码设置 -->
+    <view class="form-section" hidden="{{currentStep !== 2}}">
+        <view class="section-title">密码设置</view>
+        <view class="form-item">
+            <view class="form-label">活动密码</view>
+            <input class="form-input" type="password" placeholder="请设置活动密码" value="{{formData.password}}" bindinput="onInputChange" data-field="password" />
+            <view class="form-tip">该密码将用于管理员验证身份，请妥善保管</view>
+        </view>
+        <view class="room-preview" wx:if="{{generatedRooms.length > 0}}">
+            <view class="preview-title">房间预览（共 {{generatedRooms.length}} 间）</view>
+            <view class="preview-list">
+                <view wx:for="{{generatedRooms.slice(0, 10)}}" wx:key="index" class="preview-item">
+                    {{item.buildingNumber}} {{item.unitNumber}}单元 {{item.floorNumber}}层 {{item.roomNumber}}室 ({{item.houseType}})
+                </view>
+                <view class="preview-more" wx:if="{{generatedRooms.length > 10}}">
+                    ...等共 {{generatedRooms.length}} 间房
+                </view>
+            </view>
+        </view>
+    </view>
+    <!-- 底部按钮 -->
+    <view class="button-group">
+        <button class="btn btn-secondary" bindtap="prevStep" wx:if="{{currentStep > 0}}">
+            上一步
+        </button>
+        <button class="btn btn-primary" bindtap="nextStep" wx:if="{{currentStep < steps.length - 1}}">
+            下一步
+        </button>
+        <button class="btn btn-primary" bindtap="submitForm" wx:if="{{currentStep === steps.length - 1}}" loading="{{submitting}}">
+            创建活动
+        </button>
+    </view>
+</view>

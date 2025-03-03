@@ -1,0 +1,258 @@
+/* 页面容器 */
+.container {
+    padding: 30rpx;
+    background-color: #f8f8f8;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* 页面头部 */
+.header {
+    text-align: center;
+    margin-bottom: 40rpx;
+}
+
+.title {
+    font-size: 36rpx;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10rpx;
+}
+
+.subtitle {
+    font-size: 28rpx;
+    color: #666;
+}
+
+/* 步骤导航 */
+.steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40rpx;
+    position: relative;
+}
+
+.steps::before {
+    content: '';
+    position: absolute;
+    top: 30rpx;
+    left: 0;
+    right: 0;
+    height: 2rpx;
+    background-color: #e0e0e0;
+    z-index: 1;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+}
+
+.step-number {
+    width: 60rpx;
+    height: 60rpx;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28rpx;
+    margin-bottom: 10rpx;
+}
+
+.step.active .step-number {
+    background-color: #07c160;
+}
+
+.step-text {
+    font-size: 24rpx;
+    color: #999;
+}
+
+.step.active .step-text {
+    color: #07c160;
+}
+
+/* 表单区域 */
+.form-section {
+    background-color: #fff;
+    border-radius: 12rpx;
+    padding: 30rpx;
+    margin-bottom: 30rpx;
+    box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+    font-size: 32rpx;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 30rpx;
+    padding-bottom: 20rpx;
+    border-bottom: 1rpx solid #f0f0f0;
+}
+
+.form-item {
+    margin-bottom: 30rpx;
+}
+
+.form-label {
+    font-size: 28rpx;
+    color: #333;
+    margin-bottom: 15rpx;
+}
+
+.form-input {
+    width: 100%;
+    height: 80rpx;
+    border: 1rpx solid #e0e0e0;
+    border-radius: 8rpx;
+    padding: 0 20rpx;
+    box-sizing: border-box;
+    font-size: 28rpx;
+}
+
+.form-tip {
+    font-size: 24rpx;
+    color: #999;
+    margin-top: 10rpx;
+}
+
+/* 日期时间选择器 */
+.date-time-picker {
+    display: flex;
+    justify-content: space-between;
+}
+
+.picker-item {
+    width: 48%;
+    height: 80rpx;
+    border: 1rpx solid #e0e0e0;
+    border-radius: 8rpx;
+    padding: 0 20rpx;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 28rpx;
+}
+
+.picker-item.full-width {
+    width: 100%;
+}
+
+.picker-arrow {
+    color: #999;
+    font-size: 24rpx;
+}
+
+/* 户型选择 */
+.house-types {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10rpx;
+}
+
+.house-type {
+    margin: 10rpx;
+    padding: 15rpx 30rpx;
+    border: 1rpx solid #e0e0e0;
+    border-radius: 8rpx;
+    font-size: 28rpx;
+    color: #666;
+    background-color: #f8f8f8;
+}
+
+.house-type.selected {
+    background-color: #e6f7ef;
+    color: #07c160;
+    border-color: #07c160;
+}
+
+/* 房间预览 */
+.room-preview {
+    margin-top: 40rpx;
+    padding-top: 30rpx;
+    border-top: 1rpx solid #f0f0f0;
+}
+
+.preview-title {
+    font-size: 28rpx;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20rpx;
+}
+
+.preview-list {
+    background-color: #f8f8f8;
+    border-radius: 8rpx;
+    padding: 20rpx;
+}
+
+.preview-item {
+    font-size: 26rpx;
+    color: #666;
+    padding: 10rpx 0;
+    border-bottom: 1rpx solid #eee;
+}
+
+.preview-item:last-child {
+    border-bottom: none;
+}
+
+.preview-more {
+    font-size: 26rpx;
+    color: #999;
+    text-align: center;
+    padding: 10rpx 0;
+}
+
+/* 按钮 */
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40rpx;
+}
+
+.btn {
+    flex: 1;
+    height: 88rpx;
+    line-height: 88rpx;
+    text-align: center;
+    border-radius: 8rpx;
+    font-size: 30rpx;
+    margin: 0 15rpx;
+}
+
+.btn-primary {
+    background-color: #07c160;
+    color: #fff;
+}
+
+.btn-secondary {
+    background-color: #f2f2f2;
+    color: #666;
+}
+
+/* 适配小屏幕 */
+@media screen and (max-width: 375px) {
+    .container {
+        padding: 20rpx;
+    }
+
+    .form-section {
+        padding: 20rpx;
+    }
+
+    .title {
+        font-size: 32rpx;
+    }
+
+    .subtitle {
+        font-size: 24rpx;
+    }
+}

@@ -1,0 +1,362 @@
+/* 页面容器 */
+.container {
+    padding: 30rpx;
+    background-color: #f8f8f8;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* 页面头部 */
+.header {
+    text-align: center;
+    margin-bottom: 40rpx;
+}
+
+.title {
+    font-size: 36rpx;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10rpx;
+}
+
+.subtitle {
+    font-size: 28rpx;
+    color: #666;
+}
+
+/* 加载中 */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100rpx 0;
+}
+
+.loading {
+    width: 80rpx;
+    height: 80rpx;
+    border: 6rpx solid #f3f3f3;
+    border-top: 6rpx solid #07c160;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-text {
+    margin-top: 20rpx;
+    font-size: 28rpx;
+    color: #666;
+}
+
+/* 错误提示 */
+.error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100rpx 0;
+}
+
+.error-text {
+    margin: 30rpx 0;
+    font-size: 30rpx;
+    color: #e64340;
+    text-align: center;
+}
+
+/* 密码验证 */
+.password-container {
+    background-color: #fff;
+    border-radius: 12rpx;
+    padding: 40rpx 30rpx;
+    margin-bottom: 30rpx;
+    box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+    font-size: 32rpx;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 30rpx;
+}
+
+.form-item {
+    margin-bottom: 30rpx;
+}
+
+.form-input {
+    width: 100%;
+    height: 80rpx;
+    border: 1rpx solid #e0e0e0;
+    border-radius: 8rpx;
+    padding: 0 20rpx;
+    box-sizing: border-box;
+    font-size: 28rpx;
+}
+
+/* 区域样式 */
+.section {
+    background-color: #fff;
+    border-radius: 12rpx;
+    padding: 30rpx;
+    margin-bottom: 30rpx;
+    box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 楼栋列表 */
+.building-list {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10rpx;
+}
+
+.building-item {
+    margin: 10rpx;
+    padding: 20rpx 30rpx;
+    border: 1rpx solid #e0e0e0;
+    border-radius: 8rpx;
+    font-size: 28rpx;
+    color: #666;
+    background-color: #f8f8f8;
+}
+
+.building-item.selected {
+    background-color: #e6f7ef;
+    color: #07c160;
+    border-color: #07c160;
+}
+
+/* 楼层列表 */
+.floor-list {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10rpx;
+}
+
+.floor-item {
+    margin: 10rpx;
+    padding: 15rpx 30rpx;
+    border: 1rpx solid #e0e0e0;
+    border-radius: 8rpx;
+    font-size: 28rpx;
+    color: #666;
+    background-color: #f8f8f8;
+}
+
+.floor-item.selected {
+    background-color: #e6f7ef;
+    color: #07c160;
+    border-color: #07c160;
+}
+
+/* 房间列表 */
+.room-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20rpx;
+}
+
+.room-item {
+    position: relative;
+    padding: 20rpx;
+    border: 1rpx solid #e0e0e0;
+    border-radius: 8rpx;
+    background-color: #fff;
+}
+
+.room-item.selected {
+    background-color: #e6f7ef;
+    border-color: #07c160;
+}
+
+.room-item.sold {
+    background-color: #f8f8f8;
+    opacity: 0.7;
+}
+
+.room-number {
+    font-size: 32rpx;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10rpx;
+}
+
+.room-info {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 10rpx;
+}
+
+.room-info text {
+    margin-right: 15rpx;
+    font-size: 24rpx;
+    color: #666;
+}
+
+.room-price {
+    font-size: 28rpx;
+    color: #f5222d;
+    font-weight: bold;
+}
+
+.room-status {
+    position: absolute;
+    top: 20rpx;
+    right: 20rpx;
+    font-size: 24rpx;
+}
+
+.room-item.sold .room-status text {
+    color: #999;
+}
+
+.room-item:not(.sold) .room-status text {
+    color: #07c160;
+}
+
+/* 已选房间 */
+.selected-rooms {
+    margin-top: 20rpx;
+}
+
+.selected-room-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20rpx;
+    border-bottom: 1rpx solid #f0f0f0;
+}
+
+.selected-room-info {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.selected-room-info text {
+    margin-right: 20rpx;
+    font-size: 28rpx;
+    color: #333;
+}
+
+.selected-room-action {
+    color: #999;
+}
+
+/* 按钮 */
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40rpx;
+    margin-bottom: 40rpx;
+}
+
+.btn {
+    flex: 1;
+    height: 88rpx;
+    line-height: 88rpx;
+    text-align: center;
+    border-radius: 8rpx;
+    font-size: 30rpx;
+    margin: 0 15rpx;
+}
+
+.btn-primary {
+    background-color: #07c160;
+    color: #fff;
+}
+
+.btn-secondary {
+    background-color: #f2f2f2;
+    color: #666;
+}
+
+button[disabled] {
+    background-color: #e0e0e0 !important;
+    color: #999 !important;
+}
+
+/* 抢房结果 */
+.result-container {
+    background-color: #fff;
+    border-radius: 12rpx;
+    padding: 40rpx 30rpx;
+    margin-bottom: 30rpx;
+    box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+.result-icon {
+    margin-bottom: 30rpx;
+}
+
+.result-title {
+    font-size: 36rpx;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20rpx;
+}
+
+.result-message {
+    font-size: 28rpx;
+    color: #666;
+    margin-bottom: 40rpx;
+}
+
+.result-details {
+    text-align: left;
+    margin-top: 40rpx;
+    padding-top: 30rpx;
+    border-top: 1rpx solid #f0f0f0;
+}
+
+.result-rooms {
+    margin-top: 20rpx;
+}
+
+.result-room-item {
+    padding: 20rpx;
+    border-bottom: 1rpx solid #f0f0f0;
+}
+
+.result-room-number {
+    font-size: 32rpx;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10rpx;
+}
+
+.result-room-info {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 10rpx;
+}
+
+.result-room-info text {
+    margin-right: 20rpx;
+    font-size: 28rpx;
+    color: #666;
+}
+
+.result-room-time {
+    font-size: 24rpx;
+    color: #999;
+}
+
+/* 成功和失败图标颜色 */
+.result-icon.success {
+    color: #07c160;
+}
+
+.result-icon.fail {
+    color: #e64340;
+}
