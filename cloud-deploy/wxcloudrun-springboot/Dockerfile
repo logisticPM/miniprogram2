@@ -71,18 +71,18 @@ RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
 RUN echo '#!/bin/sh\n\
     echo "Starting application..."\n\
     # 提供一个简单的静态健康检查响应，直到应用完全启动\n\
-    (while true; do { echo -e "HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\n\\r\\n$(cat /app/health.json)"; } | nc -l -p 80; done) &\n\
+    (while true; do { echo -e "HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\n\\r\\n$(cat /app/health.json)"; } | nc -l -p 8080; done) &\n\
     # 记录后台进程ID以便后续终止\n\
     NC_PID=$!\n\
     # 启动Java应用\n\
-    java -Duser.timezone=Asia/Shanghai -Xms512m -Xmx1g -jar /app/app.jar --server.port=80 --management.endpoints.web.exposure.include=health --management.endpoint.health.show-details=always &\n\
+    java -Duser.timezone=Asia/Shanghai -Xms512m -Xmx1g -jar /app/app.jar --server.port=8080 --management.endpoints.web.exposure.include=health --management.endpoint.health.show-details=always &\n\
     JAVA_PID=$!\n\
     # 等待Java应用完全启动(最多等待90秒)\n\
     echo "Waiting for application to start..."\n\
     for i in $(seq 1 90); do\n\
     sleep 1\n\
-    # 检查应用是否在80端口上监听\n\
-    if nc -z localhost 80; then\n\
+    # 检查应用是否在8080端口上监听\n\
+    if nc -z localhost 8080; then\n\
     # 应用已启动，等待5秒确保它稳定运行\n\
     sleep 5\n\
     # 终止临时的netcat服务\n\
@@ -97,7 +97,7 @@ RUN echo '#!/bin/sh\n\
     ' > /app/start.sh && chmod +x /app/start.sh
 
 # 设置端口环境变量
-ENV PORT=80
+ENV PORT=8080
 
 # 暴露端口
 EXPOSE ${PORT}
