@@ -75,6 +75,28 @@
    - 使用多阶段构建，只在最终镜像中包含必要的组件
    - 减少对外部镜像的依赖
 
+### 问题：阿里云镜像仓库访问权限错误
+
+**症状**：
+- 构建日志中出现类似以下错误：
+- `ERROR: failed to solve: registry.cn-hangzhou.aliyuncs.com/aliyun-openjdk/openjdk:17-jre-alpine: pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed`
+
+**解决方案**：
+
+1. **使用公开可访问的Docker Hub镜像**：
+   - 修改Dockerfile，将阿里云镜像源替换回Docker Hub官方镜像
+   - 例如，将 `FROM registry.cn-hangzhou.aliyuncs.com/aliyun-openjdk/openjdk:17-jre-alpine` 替换为 `FROM openjdk:17-jre-alpine`
+   - 这样可以避免权限问题，因为Docker Hub的官方镜像是公开可访问的
+
+2. **关闭自定义镜像仓库设置**：
+   - 在`container.config.json`中将`USE_CUSTOM_REGISTRY`和`USE_ALIYUN_MIRROR`设置为`"false"`
+   - 更新`TRIGGER_REBUILD`时间戳以触发重新构建
+
+3. **如果确实需要使用阿里云镜像**：
+   - 确保微信云托管有权限访问指定的阿里云镜像仓库
+   - 可能需要设置镜像仓库为公开访问
+   - 或者配置适当的访问凭证
+
 **实际案例**：
 
 以下是一个修复了镜像拉取超时问题的Dockerfile示例：

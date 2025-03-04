@@ -1,9 +1,9 @@
 # 微信云托管优化Dockerfile
 # 更新日期: 2025-03-04
-# 版本: 1.2.0 - 使用阿里云镜像源，解决镜像拉取超时问题
+# 版本: 1.2.1 - 使用公开可访问的镜像源，解决权限问题
 
 # 第一阶段：构建阶段
-FROM registry.cn-hangzhou.aliyuncs.com/aliyun-openjdk/openjdk:17-jdk-alpine AS builder
+FROM openjdk:17-jdk-alpine AS builder
 
 # 指定工作目录
 WORKDIR /build
@@ -46,7 +46,7 @@ RUN mkdir -p /build/static && \
     echo '{"status":"UP"}' > /build/static/health.json
 
 # 第二阶段：运行阶段
-FROM registry.cn-hangzhou.aliyuncs.com/aliyun-openjdk/openjdk:17-jre-alpine
+FROM openjdk:17-jre-alpine
 
 # 指定工作目录
 WORKDIR /app
