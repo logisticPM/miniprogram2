@@ -9,6 +9,11 @@
 
 ## 更新日志
 
+### 2025-03-04 13:50 更新
+- 集成阿里云Docker Registry，解决镜像拉取失败问题
+- 添加镜像仓库配置文档
+- 优化构建流程，提高部署成功率
+
 ### 2025-03-04 13:39 更新
 - 优化构建流程，减少镜像拉取失败风险
 - 增加构建缓存策略，提高部署速度
@@ -56,6 +61,23 @@
 5. **数据持久化**
    - 使用MySQL存储业务数据
    - 不在容器内存储持久化文件
+
+## 阿里云Docker Registry集成
+
+为解决微信云托管镜像拉取失败问题，本项目集成了阿里云Docker Registry：
+
+1. **仓库信息**
+   - 仓库名称: miniprogra
+   - 仓库地域: 华东1（杭州）
+   - 公网地址: crpi-mn807cz6acoglkss.cn-hangzhou.personal.cr.aliyuncs.com/miniprogram1/miniprogra
+
+2. **集成优势**
+   - 提高镜像拉取成功率
+   - 加快部署速度
+   - 提供更稳定的镜像存储服务
+
+3. **使用方式**
+   - 详细配置请参考 [docker-registry-config.md](./docker-registry-config.md)
 
 ## 构建优化策略
 
@@ -114,6 +136,7 @@
 ├── kubernetes-deployment.yaml      Kubernetes部署配置文件
 ├── DEPLOYMENT.md                   部署指南文档
 ├── check-cloud-config.sh           云托管配置检查脚本
+├── docker-registry-config.md       阿里云Docker Registry配置文档
 └── src                             源码目录
     └── main                        源码主目录
         ├── java                    业务逻辑目录

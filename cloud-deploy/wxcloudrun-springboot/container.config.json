@@ -17,7 +17,9 @@
 		}
 	],
 	"envParams": {
-		"TRIGGER_REBUILD": "2025-03-04-1317"
+		"TRIGGER_REBUILD": "2025-03-04-1350",
+		"USE_CUSTOM_REGISTRY": "true",
+		"REGISTRY_URL": "crpi-mn807cz6acoglkss.cn-hangzhou.personal.cr.aliyuncs.com/miniprogram1/miniprogra"
 	},
 	"customLogs": "stdout",
 	"dataBaseName": "springboot_demo",
