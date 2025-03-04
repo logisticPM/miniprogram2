@@ -9,28 +9,26 @@
 * +----------------------------------------------------------------------
 */
 
-// 是否为开发环境
-const isDev = true; // 设置为true启用开发环境
+const env = require('./env');
 
 // 云开发环境配置
 const config = {
-  // 使用云开发时，apiBaseUrl可以为空，因为路径直接在请求中指定
-  apiBaseUrl: '',
-  env: isDev ? 'development' : 'production',
+  // API基础URL
+  apiBaseUrl: env.apiBaseUrl,
+  env: env.ENV_TYPE,
   // 从微信云托管控制台获取的环境ID
-  cloudEnv: '0d1hHa0w390gu43Oq0w3A1CXs1hHa0Z', // 使用控制台日志中显示的实际环境ID
+  cloudEnv: env.cloudEnv,
   // 从微信云托管控制台获取的服务名称
-  serviceName: 'wxcloudrun-springboot', // 使用您的实际服务名称
+  serviceName: env.serviceName,
   // 基础库最低版本要求
-  minLibVersion: '2.23.0',
+  minLibVersion: env.minLibVersion,
   // 是否启用本地调试日志
-  enableDebugLog: true,
+  enableDebugLog: env.enableDebugLog,
   // 是否使用云托管容器调用（绕过域名限制）
-  useCloudContainer: true
+  useCloudContainer: env.useCloudContainer,
+  // 内网访问地址（如果存在）
+  internalApiBaseUrl: env.internalApiBaseUrl
 };
-
-// 计算API主机地址（用于普通HTTP请求）
-config.apiHost = `https://${config.serviceName}-${config.cloudEnv}.ap-shanghai.app.tcloudbase.com`;
 
 // 检查基础库版本
 const checkBaseLibVersion = () => {

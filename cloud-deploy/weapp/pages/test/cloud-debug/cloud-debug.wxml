@@ -1,0 +1,86 @@
+<!--pages/test/cloud-debug/cloud-debug.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">云托管调试工具</text>
+    <text class="subtitle">用于诊断和解决云托管连接问题</text>
+  </view>
+
+  <view class="config-section">
+    <view class="section-title">当前环境配置</view>
+    <view class="config-item">
+      <text class="label">云环境ID:</text>
+      <text class="value">{{cloudEnv}}</text>
+    </view>
+    <view class="config-item">
+      <text class="label">服务名称:</text>
+      <text class="value">{{serviceName}}</text>
+    </view>
+    <view class="config-item">
+      <text class="label">API基础URL:</text>
+      <text class="value">{{apiBaseUrl}}</text>
+    </view>
+    <view class="config-item">
+      <text class="label">内网访问地址:</text>
+      <text class="value">{{internalApiBaseUrl}}</text>
+    </view>
+    <view class="config-item">
+      <text class="label">使用云托管容器调用:</text>
+      <text class="value">{{useCloudContainer ? '是' : '否'}}</text>
+    </view>
+  </view>
+
+  <view class="action-section">
+    <view class="section-title">测试操作</view>
+    <view class="button-group">
+      <button class="test-button" bindtap="testCloudInit" disabled="{{loading}}">测试云环境初始化</button>
+      <button class="test-button" bindtap="testCloudCall" disabled="{{loading}}">测试云托管调用</button>
+      <button class="test-button" bindtap="testHttpRequest" disabled="{{loading}}">测试HTTP请求</button>
+      <button class="test-button" bindtap="testPortVariable" disabled="{{loading}}">检查端口环境变量</button>
+      <button class="clear-button" bindtap="clearResults" disabled="{{loading}}">清除测试结果</button>
+    </view>
+  </view>
+
+  <view class="results-section" wx:if="{{testResults.length > 0}}">
+    <view class="section-title">测试结果</view>
+    <view class="results-list">
+      <block wx:for="{{testResults}}" wx:key="index">
+        <view class="result-item">
+          <view class="result-header">
+            <text class="result-name">{{item.name}}</text>
+            <text class="result-status {{item.status === '成功' ? 'success' : (item.status === '失败' ? 'error' : 'info')}}">{{item.status}}</text>
+          </view>
+          <view class="result-details">{{item.details}}</view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <view class="tips-section">
+    <view class="section-title">常见问题排查</view>
+    <view class="tip-item">
+      <text class="tip-title">Invalid host (errCode: -501000)</text>
+      <text class="tip-content">
+        1. 确保env.js中的cloudEnv值正确且不包含prod-前缀
+        2. 当前正确的云环境ID应为: 0d1hHa0w390gu43Oq0w3A1CXs1hHa0Z
+        3. 确保已在微信公众平台添加云托管域名到合法域名列表
+      </text>
+    </view>
+    <view class="tip-item">
+      <text class="tip-title">Invalid service (errCode: -502000)</text>
+      <text class="tip-content">
+        1. 确保env.js中的serviceName值正确
+        2. 当前生产环境的服务名称应为: springboot
+        3. 当前开发环境的服务名称应为: wxcloudrun-springboot
+      </text>
+    </view>
+    <view class="tip-item">
+      <text class="tip-title">端口配置问题</text>
+      <text class="tip-content">
+        1. 在application.yml中，端口配置为: ${PORT:80}
+        2. 这表示使用环境变量PORT的值，如果未设置则默认为80
+        3. 微信云托管会自动设置PORT环境变量
+        4. 本地开发时需要手动设置PORT环境变量或使用默认值
+      </text>
+    </view>
+  </view>
+</view>
