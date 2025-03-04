@@ -290,12 +290,12 @@ public class ActivityController {
     }
 
     /**
-     * 获取用户抢购记录
+     * 获取用户抢购记录（根据手机号）
      * @param phoneNumber 手机号
      * @return API response json
      */
     @GetMapping("/record/{phoneNumber}")
-    public ApiResponse getUserGrabRecords(@PathVariable String phoneNumber) {
+    public ApiResponse getRecordsByPhoneNumber(@PathVariable String phoneNumber) {
         logger.info("/api/activity/record/{} get request", phoneNumber);
         
         try {
@@ -322,7 +322,7 @@ public class ActivityController {
     }
 
     /**
-     * 获取用户抢购记录
+     * 获取用户抢购记录（包含活动信息）
      * @param phoneNumber 手机号
      * @return API response json
      */

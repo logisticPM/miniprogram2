@@ -37,7 +37,7 @@ public class UserLoginInterceptor implements HandlerInterceptor {
         }
         
         // 根据手机号查询用户
-        User user = userService.getUserByPhoneNumber(phoneNumber);
+        User user = userService.getByPhoneNumber(phoneNumber);
         
         // 如果用户不存在，返回未登录错误
         if (user == null) {

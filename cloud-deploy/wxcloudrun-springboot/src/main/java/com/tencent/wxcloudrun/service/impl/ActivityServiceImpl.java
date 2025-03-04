@@ -37,7 +37,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public List<Activity> getActiveActivities() {
-        return activityMapper.getActiveActivities(ActivityStatus.IN_PROGRESS);
+        return activityMapper.getActiveActivities(ActivityStatus.IN_PROGRESS.toString());
     }
 
     @Override
