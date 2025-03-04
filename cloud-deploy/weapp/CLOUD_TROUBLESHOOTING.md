@@ -21,7 +21,7 @@
    // 正确的配置示例
    production: {
      apiBaseUrl: 'https://springboot-uc65-143257-4-1322503328.sh.run.tcloudbase.com',
-     cloudEnv: 'prod-0d1hHa0w390gu43Oq0w3A1CXs1hHa0Z', // 确保这是正确的云环境ID
+     cloudEnv: 'prod-4gqa4n181c615ff2', // 确保使用正确的云环境ID，包含prod-前缀
      serviceName: 'springboot', // 确保这是正确的服务名称
      minLibVersion: '2.23.0',
      enableDebugLog: false,
@@ -29,7 +29,11 @@
    }
    ```
 
-2. 确保请求头中包含正确的 `X-WX-SERVICE` 和 `content-type`：
+2. **注意云环境ID格式**：云托管调用时，`cloudEnv`应包含`prod-`前缀。例如：
+   - 正确的云环境ID格式：`prod-4gqa4n181c615ff2`
+   - 如果遇到"Invalid host"错误，请确认环境ID包含前缀
+
+3. 确保请求头中包含正确的 `X-WX-SERVICE` 和 `content-type`：
    ```javascript
    wx.cloud.callContainer({
      config: {
@@ -50,9 +54,9 @@
    });
    ```
 
-3. 使用测试页面 (`pages/test/cloud-test`) 检查云环境连接状态和配置。
+4. 使用测试页面 (`pages/test/cloud-test`) 检查云环境连接状态和配置。
 
-4. 在微信云开发控制台检查容器状态和日志，确认服务是否正常运行。
+5. 在微信云开发控制台检查容器状态和日志，确认服务是否正常运行。
 
 ### 2. 请求返回 503 (Service Unavailable) / 504 (Gateway Timeout)
 

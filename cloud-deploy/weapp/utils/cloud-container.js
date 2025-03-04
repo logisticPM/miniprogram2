@@ -167,7 +167,7 @@ const callContainer = async (options) => {
                 }
               });
             } else {
-              // 如果已经包含prod-前缀但仍然失败，直接返回错误
+              // 如果包含prod-前缀但仍然失败，直接返回错误
               wx.showToast({
                 title: '云托管连接失败',
                 icon: 'none',
@@ -194,7 +194,17 @@ const callContainer = async (options) => {
               originalError: error
             });
           } else {
-            reject(error);
+            // 其他错误直接返回
+            wx.showToast({
+              title: '云托管调用失败',
+              icon: 'none',
+              duration: 2000
+            });
+            reject({
+              code: 'CLOUD_CONTAINER_ERROR',
+              message: '云托管调用失败，请检查网络和配置',
+              originalError: error
+            });
           }
         }
       });

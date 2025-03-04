@@ -9,7 +9,7 @@ const ENV_TYPE = 'production';
 // 各环境配置
 const ENV_CONFIG = {
   development: {
-    // 云环境ID
+    // 云环境ID - 使用prod-前缀
     cloudEnv: 'prod-4gqa4n181c615ff2',
     // 云托管服务名称
     serviceName: 'wxcloudrun-springboot',
@@ -27,7 +27,7 @@ const ENV_CONFIG = {
     useCloudContainer: false
   },
   production: {
-    // 云环境ID - 使用prod-前缀以接入云托管环境
+    // 云环境ID - 使用prod-前缀
     cloudEnv: 'prod-4gqa4n181c615ff2',
     // 云托管服务名称
     serviceName: 'springboot',
