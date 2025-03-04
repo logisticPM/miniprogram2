@@ -17,7 +17,7 @@
 		}
 	],
 	"envParams": {
-		"TRIGGER_REBUILD": "2025-03-04-1510",
+		"TRIGGER_REBUILD": "2025-03-04-1518",
 		"USE_CUSTOM_REGISTRY": "false",
 		"REGISTRY_URL": "crpi-mn807cz6acoglkss.cn-hangzhou.personal.cr.aliyuncs.com/miniprogram1/miniprogra",
 		"USE_ALIYUN_MIRROR": "false"
