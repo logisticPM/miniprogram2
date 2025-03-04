@@ -43,12 +43,34 @@
 ├── pom.xml                         pom.xml文件
 ├── settings.xml                    maven 配置文件
 ├── springboot-cloudbaserun.iml     项目配置文件
+├── kubernetes-deployment.yaml      Kubernetes部署配置文件
+├── DEPLOYMENT.md                   部署指南文档
+├── check-cloud-config.sh           云托管配置检查脚本
 └── src                             源码目录
     └── main                        源码主目录
         ├── java                    业务逻辑目录
         └── resources               资源文件目录
 ~~~
 
+## 环境变量
+- MYSQL_ADDRESS: MySQL访问地址，如 10.0.0.1:3306
+- MYSQL_USERNAME：MySQL用户名
+- MySQL_PASSWORD：MySQL密码
+- MYSQL_DATABASE：MySQL数据库
+- PORT：应用监听端口，默认为80（重要：确保云托管服务管理接口也配置为80）
+- ADMIN_PASSWORD：管理员密码，用于创建活动（默认值：9000000）
+
+## 端口配置说明
+本应用默认使用**80端口**，可通过环境变量`PORT`覆盖。请确保：
+
+1. 在云托管控制台中，将服务端口设置为80
+2. 健康检查配置使用正确的端口和路径（/api/health）
+3. 如需修改端口，请同时更新以下位置：
+   - 环境变量`PORT`
+   - 云托管服务管理接口配置
+   - Dockerfile中的EXPOSE指令
+
+更多部署和配置信息，请参考[DEPLOYMENT.md](./DEPLOYMENT.md)文件。
 
 ## 服务 API 文档
 
