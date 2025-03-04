@@ -45,7 +45,7 @@
 3. 修改`weapp/config.js`文件中的配置：
    ```javascript
    // 云环境ID，替换为您的实际环境ID
-   cloudEnv: '4gqa4n181c615ff2',
+   cloudEnv: 'prod-4gqa4n181c615ff2',
    // 服务名称，替换为您的实际服务名称
    serviceName: 'springboot',
    ```
@@ -86,8 +86,8 @@
 
 ### 云环境ID
 
-- 当前云环境ID: `4gqa4n181c615ff2`
-- 注意: 不要在配置中包含`prod-`前缀
+- 当前云环境ID: `prod-4gqa4n181c615ff2`
+- 注意: 此环境使用`prod-`前缀以接入云托管环境
 
 ### 服务配置
 
@@ -110,7 +110,7 @@
 ## 更新日志
 
 ### 2025-03-04
-- 更新云环境ID为`4gqa4n181c615ff2`
+- 更新云环境ID为`prod-4gqa4n181c615ff2`
 - 优化云托管调用方法
 - 增强服务状态检测功能
 
