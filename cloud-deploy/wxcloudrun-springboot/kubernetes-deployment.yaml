@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wxcloudrun-springboot
+  labels:
+    app: wxcloudrun-springboot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wxcloudrun-springboot
+  template:
+    metadata:
+      labels:
+        app: wxcloudrun-springboot
+    spec:
+      containers:
+      - name: wxcloudrun-springboot
+        image: ${CONTAINER_REGISTRY}/${NAMESPACE}/${IMAGE_NAME}:${IMAGE_TAG}
+        ports:
+        - containerPort: 80
+        env:
+        - name: PORT
+          value: "80"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 80
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 80
+          initialDelaySeconds: 120
+          periodSeconds: 20
+          timeoutSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /api/ping
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 12  # 允许应用最多2分钟启动时间
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wxcloudrun-springboot
+  labels:
+    app: wxcloudrun-springboot
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+  selector:
+    app: wxcloudrun-springboot
+  type: ClusterIP
