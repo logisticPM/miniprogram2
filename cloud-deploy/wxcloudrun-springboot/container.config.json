@@ -3,7 +3,7 @@
 	"minNum": 0,
 	"maxNum": 5,
 	"cpu": 1,
-	"mem": 2,
+	"mem": 2.5,
 	"policyType": "cpu",
 	"policyThreshold": 50,
 	"policyDetails": [
@@ -16,7 +16,9 @@
 			"PolicyThreshold": 50
 		}
 	],
-	"envParams": {},
+	"envParams": {
+		"TRIGGER_REBUILD": "2025-03-04-1317"
+	},
 	"customLogs": "stdout",
 	"dataBaseName": "springboot_demo",
 	"executeSQLs": [
