@@ -118,9 +118,11 @@ RUN echo '#!/bin/bash' > /app/start.sh && \
     echo 'NC_PID=$!' >> /app/start.sh && \
     echo 'log "Temporary health check service started with PID: $NC_PID"' >> /app/start.sh && \
     echo '' >> /app/start.sh && \
+    echo '# 使用环境变量PORT或默认为80' >> /app/start.sh && \
+    echo 'export PORT=${PORT:-80}' >> /app/start.sh && \
+    echo 'log "Starting application on port: $PORT"' >> /app/start.sh && \
     echo '# 启动Java应用' >> /app/start.sh && \
-    echo 'log "Starting Java application..."' >> /app/start.sh && \
-    echo 'java -Duser.timezone=Asia/Shanghai -Xms512m -Xmx1g -jar /app/app.jar --server.port=8080 --management.endpoints.web.exposure.include=health --management.endpoint.health.show-details=always > >(tee -a $LOG_FILE) 2>&1 &' >> /app/start.sh && \
+    echo 'java -Duser.timezone=Asia/Shanghai -Xms512m -Xmx1g -jar /app/app.jar --server.port=$PORT --management.endpoints.web.exposure.include=health --management.endpoint.health.show-details=always > >(tee -a $LOG_FILE) 2>&1 &' >> /app/start.sh && \
     echo 'JAVA_PID=$!' >> /app/start.sh && \
     echo 'log "Java application started with PID: $JAVA_PID"' >> /app/start.sh && \
     echo '' >> /app/start.sh && \
@@ -128,10 +130,10 @@ RUN echo '#!/bin/bash' > /app/start.sh && \
     echo 'log "Waiting for application to start..."' >> /app/start.sh && \
     echo 'for i in $(seq 1 90); do' >> /app/start.sh && \
     echo '  sleep 1' >> /app/start.sh && \
-    echo '  # 检查应用是否在8080端口上监听' >> /app/start.sh && \
-    echo '  if nc -z localhost 8080; then' >> /app/start.sh && \
+    echo '  # 检查应用是否在$PORT端口上监听' >> /app/start.sh && \
+    echo '  if nc -z localhost $PORT; then' >> /app/start.sh && \
     echo '    # 尝试访问健康检查端点' >> /app/start.sh && \
-    echo '    HEALTH_RESPONSE=$(curl -s http://localhost:8080/api/health 2>/dev/null || echo "")' >> /app/start.sh && \
+    echo '    HEALTH_RESPONSE=$(curl -s http://localhost:$PORT/api/health 2>/dev/null || echo "")' >> /app/start.sh && \
     echo '    if [[ "$HEALTH_RESPONSE" == *"UP"* ]]; then' >> /app/start.sh && \
     echo '      # 应用已启动，等待5秒确保它稳定运行' >> /app/start.sh && \
     echo '      sleep 5' >> /app/start.sh && \
@@ -145,7 +147,7 @@ RUN echo '#!/bin/bash' > /app/start.sh && \
     echo '      touch /app/app_started' >> /app/start.sh && \
     echo '      break' >> /app/start.sh && \
     echo '    else' >> /app/start.sh && \
-    echo '      log "Port 8080 is open but health check not yet responding properly"' >> /app/start.sh && \
+    echo '      log "Port $PORT is open but health check not yet responding properly"' >> /app/start.sh && \
     echo '    fi' >> /app/start.sh && \
     echo '  fi' >> /app/start.sh && \
     echo '  if [ $((i % 10)) -eq 0 ]; then' >> /app/start.sh && \
@@ -168,15 +170,15 @@ RUN echo '#!/bin/bash' > /app/start.sh && \
     echo '  else' >> /app/start.sh && \
     echo '    # Java进程已经退出，记录错误并尝试重启' >> /app/start.sh && \
     echo '    log "Java process exited unexpectedly. Attempting to restart..."' >> /app/start.sh && \
-    echo '    java -Duser.timezone=Asia/Shanghai -Xms512m -Xmx1g -jar /app/app.jar --server.port=8080 --management.endpoints.web.exposure.include=health --management.endpoint.health.show-details=always > >(tee -a $LOG_FILE) 2>&1 &' >> /app/start.sh && \
+    echo '    java -Duser.timezone=Asia/Shanghai -Xms512m -Xmx1g -jar /app/app.jar --server.port=$PORT --management.endpoints.web.exposure.include=health --management.endpoint.health.show-details=always > >(tee -a $LOG_FILE) 2>&1 &' >> /app/start.sh && \
     echo '    JAVA_PID=$!' >> /app/start.sh && \
     echo '    log "Java process restarted with PID: $JAVA_PID"' >> /app/start.sh && \
     echo '  fi' >> /app/start.sh && \
     echo 'done' >> /app/start.sh && \
     chmod +x /app/start.sh
 
-# 设置端口环境变量
-ENV PORT=8080
+# 设置端口环境变量（默认80，但允许被环境变量覆盖）
+ENV PORT=80
 
 # 暴露端口
 EXPOSE ${PORT}
