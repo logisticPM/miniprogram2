@@ -1,6 +1,6 @@
 # 微信云托管优化Dockerfile
-# 更新日期: 2025-03-03
-# 版本: 1.1.4 - 修复变量转义问题，增强信号处理，改进日志输出
+# 更新日期: 2025-03-04
+# 版本: 1.1.5 - 更新基础镜像，解决构建失败问题
 
 # 第一阶段：构建阶段
 FROM maven:3.8.6-eclipse-temurin-17-alpine AS builder
@@ -43,7 +43,7 @@ RUN mkdir -p /build/static && \
     echo '{"status":"UP"}' > /build/static/health.json
 
 # 第二阶段：运行阶段
-FROM eclipse-temurin:17-jre-alpine
+FROM openjdk:17-jre-alpine
 
 # 指定工作目录
 WORKDIR /app
