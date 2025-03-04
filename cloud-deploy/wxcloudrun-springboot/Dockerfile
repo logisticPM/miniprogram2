@@ -1,9 +1,9 @@
 # 微信云托管优化Dockerfile
 # 更新日期: 2025-03-04
-# 版本: 1.3.1 - 使用非Alpine版本的基础镜像
+# 版本: 1.3.2 - 使用maven官方镜像作为构建阶段
 
 # 第一阶段：构建阶段
-FROM openjdk:17 AS builder
+FROM maven:3.8.6-openjdk-17 AS builder
 
 # 指定工作目录
 WORKDIR /build
@@ -24,9 +24,6 @@ RUN mkdir -p /root/.m2 \
     </mirrors>\
     </settings>' > /root/.m2/settings.xml
 
-# 安装Maven并清理缓存（合并命令减少层数）
-RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
-
 # 只复制pom.xml进行依赖下载，利用Docker缓存机制
 COPY pom.xml /build/
 RUN mvn dependency:go-offline -B
@@ -46,7 +43,7 @@ RUN mkdir -p /build/static && \
     echo '{"status":"UP"}' > /build/static/health.json
 
 # 第二阶段：运行阶段
-FROM openjdk:17
+FROM openjdk:17-jre
 
 # 指定工作目录
 WORKDIR /app
