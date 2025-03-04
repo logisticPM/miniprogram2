@@ -14,7 +14,7 @@ const ENV_CONFIG = {
     // 云托管服务名称
     serviceName: 'wxcloudrun-springboot',
     // API基础URL
-    apiBaseUrl: 'http://localhost:8080',
+    apiBaseUrl: 'http://localhost:80',
     // 调试模式
     debug: true,
     // 环境名称
@@ -36,15 +36,15 @@ const ENV_CONFIG = {
     // 备用测试域名（仅用于测试，不可用于正式环境）
     testApiBaseUrl: 'https://springboot-uc65-143257-4-1322503328.sh.run.tcloudbase.com',
     // 内网访问地址（仅在云托管环境内使用）
-    internalApiBaseUrl: 'cdmoyuli.springboot-uc65.jpz1lqiu.l9g8gc3b.com',
+    internalApiBaseUrl: 'http://cdmoyuli.springboot-uc65.jpz1lqiu.l9g8gc3b.com',
     // 调试模式
-    debug: false,
+    debug: true, // 临时开启调试模式以查看错误信息
     // 环境名称
     envName: 'production',
     // 最低SDK版本
     minLibVersion: '2.23.0',
     // 是否启用调试日志
-    enableDebugLog: false,
+    enableDebugLog: true, // 临时开启调试日志以查看错误信息
     // 是否使用云容器
     useCloudContainer: true,
     // 云存储配置

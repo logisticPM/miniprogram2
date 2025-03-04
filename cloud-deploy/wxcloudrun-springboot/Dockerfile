@@ -113,8 +113,8 @@ RUN echo '#!/bin/bash' > /app/start.sh && \
     echo 'trap cleanup SIGTERM SIGINT' >> /app/start.sh && \
     echo '' >> /app/start.sh && \
     echo '# 提供一个简单的静态健康检查响应，直到应用完全启动' >> /app/start.sh && \
-    echo 'log "Starting temporary health check service on port 8080"' >> /app/start.sh && \
-    echo '(while true; do { echo -e "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n$(cat /app/health.json)"; } | nc -l -p 8080; done) &' >> /app/start.sh && \
+    echo 'log "Starting temporary health check service on port 8081"' >> /app/start.sh && \
+    echo '(while true; do { echo -e "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n$(cat /app/health.json)"; } | nc -l -p 8081; done) &' >> /app/start.sh && \
     echo 'NC_PID=$!' >> /app/start.sh && \
     echo 'log "Temporary health check service started with PID: $NC_PID"' >> /app/start.sh && \
     echo '' >> /app/start.sh && \

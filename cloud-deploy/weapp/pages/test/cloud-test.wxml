@@ -1,0 +1,78 @@
+<!-- pages/test/cloud-test.wxml -->
+<view class="container">
+  <view class="header">
+    <text class="title">云托管连接测试</text>
+  </view>
+  
+  <view class="section">
+    <view class="section-title">配置信息</view>
+    <view class="info-item">
+      <text class="label">云环境ID:</text>
+      <text class="value">{{cloudEnv}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">服务名称:</text>
+      <text class="value">{{serviceName}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">API基础URL:</text>
+      <text class="value">{{apiBaseUrl}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">使用云容器:</text>
+      <text class="value">{{useCloudContainer}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">SDK版本:</text>
+      <text class="value">{{sdkVersion}}</text>
+    </view>
+    <button class="btn" bindtap="copyConfig">复制配置信息</button>
+  </view>
+  
+  <view class="section">
+    <view class="section-title">测试操作</view>
+    <view class="btn-group">
+      <button class="btn" bindtap="testCloudInit">测试云环境初始化</button>
+      <button class="btn" bindtap="testCloudCall">测试云托管调用</button>
+      <button class="btn" bindtap="testHttpRequest">测试HTTP请求</button>
+      <button class="btn primary" bindtap="startService">启动服务</button>
+      <button class="btn" bindtap="clearResults">清空结果</button>
+    </view>
+  </view>
+  
+  <view class="section">
+    <view class="section-title">504错误排查指南</view>
+    <view class="guide-content">
+      <view class="guide-item">
+        <text class="guide-title">1. 容器未启动或冷启动中</text>
+        <text class="guide-desc">• 点击上方"启动服务"按钮触发服务启动</text>
+        <text class="guide-desc">• 等待1-2分钟后再次尝试请求</text>
+        <text class="guide-desc">• 考虑将最小副本数从0调整为1以避免冷启动</text>
+      </view>
+      <view class="guide-item">
+        <text class="guide-title">2. 端口配置不匹配</text>
+        <text class="guide-desc">• 确认SpringBoot应用的server.port为80或使用环境变量PORT</text>
+        <text class="guide-desc">• 检查Dockerfile中EXPOSE指令与应用端口一致</text>
+        <text class="guide-desc">• 检查云托管环境变量中的PORT设置</text>
+      </view>
+      <view class="guide-item">
+        <text class="guide-title">3. 域名配置不正确</text>
+        <text class="guide-desc">• 确保cloudEnv值不包含prod-前缀</text>
+        <text class="guide-desc">• 使用云托管控制台提供的正确域名</text>
+        <text class="guide-desc">• 添加域名到合法域名列表</text>
+      </view>
+    </view>
+  </view>
+  
+  <view class="section">
+    <view class="section-title">测试结果</view>
+    <scroll-view scroll-y="true" class="result-container">
+      <block wx:for="{{testResults}}" wx:key="index">
+        <view class="result-item">
+          <view class="result-title">{{item.title}}</view>
+          <view class="result-content">{{item.content}}</view>
+        </view>
+      </block>
+    </scroll-view>
+  </view>
+</view>
