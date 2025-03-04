@@ -39,26 +39,57 @@
    docker build -t 镜像名称 .
    ```
 
-### 问题：镜像拉取失败
+### 问题：镜像拉取失败或超时
 
 **症状**：
 - 微信云托管构建日志中出现镜像拉取失败的错误
 - 错误信息包含：`pulling from host mirror.ccs.tencentyun.com failed`
+- 错误信息包含：`dial tcp xxx.xxx.xxx.xxx:443: i/o timeout`
+- 错误信息包含：`DeadlineExceeded: openjdk:17-jre-alpine: failed to do request`
 
 **解决方案**：
 
-1. **使用稳定的基础镜像**：
-   - 避免使用latest标签
-   - 使用特定版本的基础镜像，如`openjdk:17-jre-alpine`而非`openjdk:latest`
+1. **使用阿里云镜像源替代Docker Hub**：
+   - 修改Dockerfile，将基础镜像从Docker Hub替换为阿里云镜像仓库中的镜像
+   - 例如，将 `FROM openjdk:17-jre-alpine` 替换为 `FROM registry.cn-hangzhou.aliyuncs.com/aliyun-openjdk/openjdk:17-jre-alpine`
+   - 这样可以避免从国际Docker Hub拉取镜像时的网络问题
 
-2. **使用自定义镜像仓库**：
+2. **在Dockerfile中添加重试机制**：
+   ```dockerfile
+   # 添加重试机制的示例
+   RUN --mount=type=cache,target=/var/cache/apt \
+       apt-get update && \
+       for i in $(seq 1 3); do apt-get install -y --no-install-recommends package-name && s=0 && break || s=$? && sleep 15; done; (exit $s)
+   ```
+
+3. **使用自定义镜像仓库**：
    - 将构建好的镜像推送到阿里云Docker Registry
    - 在微信云托管中使用该镜像
    - 详细配置请参考[docker-registry-config.md](./docker-registry-config.md)
 
-3. **触发重新构建而不修改基础镜像**：
+4. **触发重新构建而不修改基础镜像**：
    - 通过更新环境变量`TRIGGER_REBUILD`触发重新构建
    - 在`container.config.json`中更新该变量的值
+
+5. **使用多阶段构建减少依赖**：
+   - 使用多阶段构建，只在最终镜像中包含必要的组件
+   - 减少对外部镜像的依赖
+
+**实际案例**：
+
+以下是一个修复了镜像拉取超时问题的Dockerfile示例：
+
+```dockerfile
+# 使用阿里云镜像源替代Docker Hub
+FROM registry.cn-hangzhou.aliyuncs.com/aliyun-openjdk/openjdk:17-jdk-alpine AS builder
+
+# 构建阶段...
+
+# 运行阶段也使用阿里云镜像源
+FROM registry.cn-hangzhou.aliyuncs.com/aliyun-openjdk/openjdk:17-jre-alpine
+
+# 运行阶段配置...
+```
 
 ## 健康检查问题
 
