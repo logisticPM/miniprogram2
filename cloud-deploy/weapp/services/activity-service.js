@@ -3,8 +3,7 @@
 * | 房产抢购小程序 - 微信云托管版
 * +----------------------------------------------------------------------
 */
-const request = require('../utils/request');
-const config = require('../config');
+const { request } = require('./request');
 
 /**
  * 活动服务
@@ -17,8 +16,11 @@ const activityService = {
    * @returns {Promise} - 返回Promise对象
    */
   getActivities: function (status) {
-    const url = status !== undefined ? `/api/grab-activities/status/${status}` : '/api/grab-activities';
-    return request.get(url);
+    return request({
+      url: '/api/activity/list',
+      method: 'GET',
+      data: status ? { status } : {}
+    });
   },
 
   /**
@@ -27,7 +29,7 @@ const activityService = {
    * @returns {Promise} - 返回Promise对象
    */
   getCurrentActivities: function () {
-    return this.getActivities(1); // 状态1表示进行中
+    return this.getActivities(1); // 1表示进行中
   },
 
   /**
@@ -36,57 +38,10 @@ const activityService = {
    * @returns {Promise} - 返回Promise对象
    */
   getActivityDetail: function (id) {
-    return request.get(`/api/grab-activities/${id}`);
-  },
-
-  /**
-   * 获取活动房源列表
-   * @param {Number} activityId - 活动ID
-   * @returns {Promise} - 返回Promise对象
-   */
-  getActivityHouses: function (activityId) {
-    return request.get(`/api/grab-activities/${activityId}/houses`);
-  },
-
-  /**
-   * 抢房
-   * @param {Number} activityId - 活动ID
-   * @param {Number} houseId - 房源ID
-   * @returns {Promise} - 返回Promise对象
-   */
-  grabHouse: function (activityId, houseId) {
-    return request.post('/api/grab', {
-      activityId: activityId,
-      houseId: houseId
+    return request({
+      url: `/api/activity/${id}`,
+      method: 'GET'
     });
-  },
-
-  /**
-   * 获取用户抢房记录
-   * @param {Number} customerId - 客户ID，不传则获取当前登录用户的记录
-   * @returns {Promise} - 返回Promise对象
-   */
-  getGrabRecords: function (customerId) {
-    const url = customerId ? `/api/grab/customer/${customerId}` : '/api/grab/customer';
-    return request.get(url);
-  },
-
-  /**
-   * 获取用户在特定活动中的抢房记录
-   * @param {Number} activityId - 活动ID
-   * @returns {Promise} - 返回Promise对象
-   */
-  getUserGrabRecords: function (activityId) {
-    return request.get(`/api/grab/activity/${activityId}/customer`);
-  },
-
-  /**
-   * 验证活动密码
-   * @param {String} password - 活动密码
-   * @returns {Promise} - 返回Promise对象
-   */
-  verifyActivityPassword: function (password) {
-    return request.post('/api/activities/verify-password', { password });
   },
 
   /**
@@ -95,30 +50,47 @@ const activityService = {
    * @returns {Promise} - 返回Promise对象
    */
   createActivity: function (activityData) {
-    return request.post('/api/activities', activityData);
+    return request({
+      url: '/api/activity/create',
+      method: 'POST',
+      data: activityData
+    });
   },
 
   /**
-   * 根据楼号、单元、户型和楼层生成房间
-   * @param {Object} buildingData - 楼栋数据
+   * 验证活动密码
+   * @param {Object} requestData - 请求数据对象，包含 activityId, password
    * @returns {Promise} - 返回Promise对象
    */
-  generateRooms: function (buildingData) {
-    return request.post('/api/activities/generate-rooms', buildingData);
+  verifyActivityPassword: function (requestData) {
+    return request({
+      url: '/api/activity/verify',
+      method: 'POST',
+      data: requestData
+    });
   },
 
   /**
-   * 批量抢购房间
+   * 参与活动
    * @param {Number} activityId - 活动ID
-   * @param {Array} roomIds - 房间ID数组
-   * @param {String} phoneNumber - 用户手机号
    * @returns {Promise} - 返回Promise对象
    */
-  batchGrabRooms: function (activityId, roomIds, phoneNumber) {
-    return request.post('/api/grab/batch', {
-      activityId: activityId,
-      roomIds: roomIds,
-      phoneNumber: phoneNumber
+  joinActivity: function (activityId) {
+    return request({
+      url: `/api/activity/${activityId}/join`,
+      method: 'POST'
+    });
+  },
+
+  /**
+   * 获取楼号列表
+   * @param {Number} activityId - 活动ID
+   * @returns {Promise} - 返回Promise对象
+   */
+  getBuildings: function (activityId) {
+    return request({
+      url: `/api/activity/${activityId}/buildings`,
+      method: 'GET'
     });
   },
 
@@ -129,7 +101,10 @@ const activityService = {
    * @returns {Promise} - 返回Promise对象
    */
   getFloors: function (activityId, buildingNumber) {
-    return request.get(`/api/activities/${activityId}/building/${buildingNumber}/floors`);
+    return request({
+      url: `/api/activity/${activityId}/building/${buildingNumber}/floors`,
+      method: 'GET'
+    });
   },
 
   /**
@@ -140,17 +115,47 @@ const activityService = {
    * @returns {Promise} - 返回Promise对象
    */
   getRooms: function (activityId, buildingNumber, floor) {
-    return request.get(`/api/activities/${activityId}/building/${buildingNumber}/floor/${floor}/rooms`);
+    return request({
+      url: `/api/activity/${activityId}/building/${buildingNumber}/floor/${floor}/rooms`,
+      method: 'GET'
+    });
   },
 
   /**
-   * 获取房源详情
-   * @param {Number} houseId - 房源ID
+   * 获取用户参与的活动列表
    * @returns {Promise} - 返回Promise对象
    */
-  getHouseDetail: function (houseId) {
-    return request.get(`${config.apiBaseUrl}/api/houses/${houseId}`);
+  getJoinedActivities: function () {
+    return request({
+      url: '/api/activity/joined',
+      method: 'GET'
+    });
+  },
+
+  /**
+   * 验证活动码
+   * @param {String} activityCode - 活动码
+   * @returns {Promise} - 返回Promise对象
+   */
+  verifyActivityCode: function (activityCode) {
+    return request({
+      url: '/api/activity/verify-code',
+      method: 'POST',
+      data: { activityCode }
+    });
+  },
+  
+  /**
+   * 获取用户抢房记录
+   * @param {String} phoneNumber - 用户手机号
+   * @returns {Promise} - 返回Promise对象
+   */
+  getUserGrabRecords: function (phoneNumber) {
+    return request({
+      url: `/api/activity/user/${phoneNumber}/records`,
+      method: 'GET'
+    });
   }
 };
 
-module.exports = activityService; 
+module.exports = activityService;
