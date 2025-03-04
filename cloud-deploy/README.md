@@ -45,9 +45,9 @@
 3. 修改`weapp/config.js`文件中的配置：
    ```javascript
    // 云环境ID，替换为您的实际环境ID
-   cloudEnv: 'your-cloud-env-id',
+   cloudEnv: '4gqa4n181c615ff2',
    // 服务名称，替换为您的实际服务名称
-   serviceName: 'your-service-name',
+   serviceName: 'springboot',
    ```
 4. 上传并发布小程序
 
@@ -81,3 +81,40 @@
 - 后端：Java 17 + SpringBoot 2.7
 - 数据库：MySQL 8
 - CI/CD：GitHub Actions 
+
+## 环境配置
+
+### 云环境ID
+
+- 当前云环境ID: `4gqa4n181c615ff2`
+- 注意: 不要在配置中包含`prod-`前缀
+
+### 服务配置
+
+- 生产环境服务名: `springboot`
+- 开发环境服务名: `wxcloudrun-springboot`
+- 默认端口: 80
+
+## 部署指南
+
+详细部署步骤请参考以下文档:
+
+- 后端部署: [wxcloudrun-springboot/DEPLOYMENT.md](wxcloudrun-springboot/DEPLOYMENT.md)
+- 本地调试: [LOCAL_DEBUG_GUIDE.md](LOCAL_DEBUG_GUIDE.md)
+
+## 故障排查
+
+如遇到云托管连接问题，请参考:
+- [CLOUD_TROUBLESHOOTING.md](weapp/CLOUD_TROUBLESHOOTING.md)
+
+## 更新日志
+
+### 2025-03-04
+- 更新云环境ID为`4gqa4n181c615ff2`
+- 优化云托管调用方法
+- 增强服务状态检测功能
+
+### 2025-03-03
+- 修复端口配置问题
+- 统一使用80端口
+- 优化健康检查接口
