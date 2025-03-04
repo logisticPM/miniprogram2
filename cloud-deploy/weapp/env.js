@@ -9,11 +9,11 @@ const ENV_TYPE = 'production';
 // 各环境配置
 const ENV_CONFIG = {
   development: {
-    // 云环境ID - 使用prod-前缀
-    cloudEnv: 'prod-4gqa4n181c615ff2',
+    // 云环境ID - 使用MEMORIES中提到的ID
+    cloudEnv: '0d1hHa0w390gu43Oq0w3A1CXs1hHa0Z',
     // 云托管服务名称
     serviceName: 'wxcloudrun-springboot',
-    // API基础URL
+    // API基础URL - 仅用于本地开发测试，生产环境使用云托管内网访问
     apiBaseUrl: 'http://localhost:80',
     // 调试模式
     debug: true,
@@ -27,67 +27,33 @@ const ENV_CONFIG = {
     useCloudContainer: false
   },
   production: {
-    // 云环境ID - 使用prod-前缀
-    cloudEnv: 'prod-4gqa4n181c615ff2',
+    // 云环境ID - 使用MEMORIES中提到的ID
+    cloudEnv: '0d1hHa0w390gu43Oq0w3A1CXs1hHa0Z',
     // 云托管服务名称
     serviceName: 'springboot',
-    // API基础URL - 使用备用测试域名
-    apiBaseUrl: 'https://springboot-uc65-143257-4-1322503328.sh.run.tcloudbase.com',
-    // 备用测试域名（仅用于测试，不可用于正式环境）
-    testApiBaseUrl: 'https://springboot-uc65-143257-4-1322503328.sh.run.tcloudbase.com',
     // 内网访问地址（仅在云托管环境内使用）
     internalApiBaseUrl: 'http://cdmoyuli.springboot-uc65.jpz1lqiu.l9g8gc3b.com',
     // 调试模式
-    debug: true, // 临时开启调试模式以查看错误信息
+    debug: false, // 生产环境关闭调试模式
     // 环境名称
     envName: 'production',
     // 最低SDK版本
     minLibVersion: '2.23.0',
     // 是否启用调试日志
-    enableDebugLog: true, // 临时开启调试日志以查看错误信息
+    enableDebugLog: false, // 生产环境关闭调试日志
     // 是否使用云容器
     useCloudContainer: true,
     // 云存储配置
     storage: {
-      bucket: '7072-prod-4gqa4n181c615ff2-1322503328',
-      region: 'ap-shanghai'
-    },
-    // 数据库配置（仅供参考，实际在后端使用）
-    database: {
-      host: '10.48.100.162',
-      port: 3306,
-      username: 'root',
-      password: 'uNvv89FG'
-    },
-    // 容器规格
-    container: {
-      cpu: 1,
-      memory: 2,
-      minReplicas: 0,
-      maxReplicas: 5,
-      scaleThresholds: {
-        cpu: 50,
-        memory: 50
-      }
-    },
-    // 云服务配置
-    cloudConfig: {
-      cpu: '1核',
-      memory: '2G',
-      minInstances: 0,
-      maxInstances: 5,
-      scaleConditions: {
-        cpu: '≥50%',
-        memory: '≥50%'
-      }
+      // 图片存储路径前缀
+      imagePath: 'images/',
+      // 文件存储路径前缀
+      filePath: 'files/',
+      // 临时文件存储路径前缀
+      tempPath: 'temp/'
     }
   }
 };
 
-// 当前环境配置
-const currentEnv = ENV_CONFIG[ENV_TYPE];
-
-module.exports = {
-  ENV_TYPE,
-  ...currentEnv
-};
+// 导出当前环境配置
+module.exports = ENV_CONFIG[ENV_TYPE];

@@ -8,10 +8,17 @@ Page({
     cloudEnv: env.cloudEnv || '未配置',
     serviceName: env.serviceName || '未配置',
     apiBaseUrl: env.apiBaseUrl || '未配置',
+    useCloudContainer: env.useCloudContainer || false,
+    sdkVersion: wx.getSystemInfoSync().SDKVersion || '未知',
     testResults: [],
     isLoading: false,
     errorMessage: '',
-    showTroubleshooting: false
+    showTroubleshooting: false,
+    cloudLimits: {
+      maxTimeout: 15000, // 15秒超时限制
+      maxRequestSize: 100 * 1024 // 100K请求大小限制
+    },
+    internalApiBaseUrl: env.internalApiBaseUrl || '未配置'
   },
 
   onLoad(options) {
@@ -19,7 +26,10 @@ Page({
     this.setData({
       cloudEnv: env.cloudEnv || '未配置',
       serviceName: env.serviceName || '未配置',
-      apiBaseUrl: env.apiBaseUrl || '未配置'
+      apiBaseUrl: env.apiBaseUrl || '未配置',
+      useCloudContainer: env.useCloudContainer || false,
+      sdkVersion: wx.getSystemInfoSync().SDKVersion || '未知',
+      internalApiBaseUrl: env.internalApiBaseUrl || '未配置'
     });
 
     // 自动检测服务状态
@@ -38,59 +48,26 @@ Page({
         traceUser: true
       });
       
-      // 获取云环境信息
-      this.getCloudEnvInfo()
-        .then(info => {
-          this.addTestResult('云环境初始化', `成功: ${JSON.stringify(info)}`);
-        })
-        .catch(error => {
-          this.addTestResult('云环境初始化', `失败: ${error.message || JSON.stringify(error)}`);
-          
-          // 尝试自动修复环境ID格式问题
-          if (error.message && error.message.includes('invalid')) {
-            const fixedEnv = this.data.cloudEnv.startsWith('prod-') 
-              ? this.data.cloudEnv.substring(5) 
-              : `prod-${this.data.cloudEnv}`;
-              
-            this.addTestResult('自动修复', `尝试使用修正后的环境ID: ${fixedEnv}`);
-            
-            // 使用修正后的环境ID重试
-            wx.cloud.init({
-              env: fixedEnv,
-              traceUser: true
-            });
-            
-            this.getCloudEnvInfo()
-              .then(info => {
-                this.addTestResult('自动修复', `成功: ${JSON.stringify(info)}`);
-              })
-              .catch(retryError => {
-                this.addTestResult('自动修复', `失败: ${retryError.message || JSON.stringify(retryError)}`);
-              });
-          }
-        })
-        .finally(() => {
-          this.setData({ isLoading: false });
-        });
-    } catch (error) {
-      this.addTestResult('云环境初始化', `错误: ${error.message || JSON.stringify(error)}`);
+      this.addTestResult('云环境初始化', '成功');
       this.setData({ isLoading: false });
-    }
-  },
-  
-  // 获取云环境信息
-  getCloudEnvInfo() {
-    return new Promise((resolve, reject) => {
-      wx.cloud.callFunction({
-        name: 'getEnvInfo',
-        success: res => {
-          resolve(res.result);
-        },
-        fail: err => {
-          reject(err);
-        }
+      
+      // 显示成功提示
+      wx.showToast({
+        title: '云环境初始化成功',
+        icon: 'success',
+        duration: 2000
       });
-    });
+    } catch (error) {
+      this.addTestResult('云环境初始化', `失败: ${error.message || JSON.stringify(error)}`);
+      this.setData({ isLoading: false });
+      
+      // 显示错误信息
+      wx.showModal({
+        title: '云环境初始化失败',
+        content: `错误信息: ${error.message || JSON.stringify(error)}`,
+        showCancel: false
+      });
+    }
   },
 
   // 测试云托管调用
@@ -122,51 +99,52 @@ Page({
           'content-type': 'application/json',
           'X-WX-EXCLUDE-CREDENTIALS': 'unionid, cloudbase-access-token'
         },
+        timeout: 10000, // 设置10秒超时，小于微信限制的15秒
         success: res => {
           this.addTestResult('云托管调用', `成功: ${JSON.stringify(res.data)}`);
           this.setData({ isLoading: false });
+          
+          // 显示成功提示
+          wx.showToast({
+            title: '云托管调用成功',
+            icon: 'success',
+            duration: 2000
+          });
         },
         fail: err => {
           this.addTestResult('云托管调用', `失败: ${err.errMsg || JSON.stringify(err)}`);
+          this.setData({ isLoading: false });
           
-          // 检查是否是环境ID格式问题
+          // 检查错误类型并提供具体建议
           if (err.errMsg && err.errMsg.includes('invalid host')) {
-            // 尝试自动修复环境ID格式问题
-            const fixedEnv = this.data.cloudEnv.startsWith('prod-') 
-              ? this.data.cloudEnv.substring(5) 
-              : `prod-${this.data.cloudEnv}`;
-              
-            this.addTestResult('自动修复', `尝试使用修正后的环境ID: ${fixedEnv}`);
+            this.setData({
+              errorMessage: '云环境ID格式错误，请检查env.js中的cloudEnv配置',
+              showTroubleshooting: true
+            });
             
-            // 使用修正后的环境ID重试
-            wx.cloud.callContainer({
-              config: {
-                env: fixedEnv
-              },
-              path: '/api/count',
-              method: 'GET',
-              header: {
-                'X-WX-SERVICE': this.data.serviceName,
-                'content-type': 'application/json',
-                'X-WX-EXCLUDE-CREDENTIALS': 'unionid, cloudbase-access-token'
-              },
-              success: retryRes => {
-                this.addTestResult('自动修复', `成功: ${JSON.stringify(retryRes.data)}`);
-                this.setData({ isLoading: false });
-              },
-              fail: retryErr => {
-                this.addTestResult('自动修复', `失败: ${retryErr.errMsg || JSON.stringify(retryErr)}`);
-                this.setData({ isLoading: false });
-                
-                // 尝试使用HTTP请求
-                this.testHttpRequest();
-              }
+            // 显示错误信息和建议
+            wx.showModal({
+              title: '云托管调用失败',
+              content: '无效的主机名(Invalid host)，请检查云环境ID配置。当前环境ID: ' + this.data.cloudEnv,
+              showCancel: false
+            });
+          } else if (err.errCode === -504000 || (err.errMsg && err.errMsg.includes('timeout'))) {
+            this.setData({
+              errorMessage: '请求超时，服务可能未启动或正在启动中，请点击"启动服务"按钮。注意：小程序云托管请求超时限制为15秒。',
+              showTroubleshooting: true
+            });
+            
+            // 显示错误信息和建议
+            wx.showModal({
+              title: '云托管调用超时',
+              content: '服务可能未启动或正在启动中，请点击"启动服务"按钮，等待1-2分钟后再次尝试。注意：小程序云托管请求超时限制为15秒，请确保后端处理逻辑不超过此限制。',
+              showCancel: false
             });
           } else {
-            this.setData({ isLoading: false });
-            
-            // 尝试使用HTTP请求
-            this.testHttpRequest();
+            this.setData({
+              errorMessage: `云托管调用失败: ${err.errMsg || JSON.stringify(err)}`,
+              showTroubleshooting: true
+            });
           }
         }
       });
@@ -174,11 +152,88 @@ Page({
       this.addTestResult('云托管调用', `错误: ${error.message || JSON.stringify(error)}`);
       this.setData({ isLoading: false });
       
-      // 尝试使用HTTP请求
-      this.testHttpRequest();
+      // 显示错误信息
+      wx.showModal({
+        title: '云托管调用异常',
+        content: `错误信息: ${error.message || JSON.stringify(error)}`,
+        showCancel: false
+      });
     }
   },
-  
+
+  // 测试内网访问
+  testInternalAccess() {
+    this.setData({ isLoading: true });
+    this.addTestResult('测试内网访问', '开始测试内网访问');
+    
+    if (!this.data.internalApiBaseUrl) {
+      this.addTestResult('测试内网访问', '内网地址未配置，请在env.js中设置internalApiBaseUrl');
+      this.setData({ isLoading: false });
+      return;
+    }
+    
+    wx.cloud.callContainer({
+      config: {
+        env: this.data.cloudEnv
+      },
+      path: '/api/count',
+      method: 'GET',
+      header: {
+        'X-WX-SERVICE': this.data.serviceName,
+        'content-type': 'application/json',
+        'X-WX-EXCLUDE-CREDENTIALS': 'unionid, cloudbase-access-token'
+      },
+      timeout: 10000, // 设置10秒超时，小于微信限制的15秒
+      success: res => {
+        this.addTestResult('测试内网访问', `成功: ${JSON.stringify(res.data)}`);
+        this.setData({ isLoading: false });
+        
+        // 显示成功提示
+        wx.showToast({
+          title: '内网访问成功',
+          icon: 'success',
+          duration: 2000
+        });
+      },
+      fail: err => {
+        this.addTestResult('测试内网访问', `失败: ${err.errMsg || JSON.stringify(err)}`);
+        this.setData({ isLoading: false });
+        
+        // 检查错误类型并提供具体建议
+        if (err.errMsg && err.errMsg.includes('invalid host')) {
+          this.setData({
+            errorMessage: '云环境ID格式错误，请检查env.js中的cloudEnv配置',
+            showTroubleshooting: true
+          });
+          
+          // 显示错误信息和建议
+          wx.showModal({
+            title: '内网访问失败',
+            content: '无效的主机名(Invalid host)，请检查云环境ID配置。当前环境ID: ' + this.data.cloudEnv,
+            showCancel: false
+          });
+        } else if (err.errCode === -504000 || (err.errMsg && err.errMsg.includes('timeout'))) {
+          this.setData({
+            errorMessage: '请求超时，服务可能未启动或正在启动中，请点击"启动服务"按钮。注意：小程序云托管请求超时限制为15秒。',
+            showTroubleshooting: true
+          });
+          
+          // 显示错误信息和建议
+          wx.showModal({
+            title: '内网访问超时',
+            content: '服务可能未启动或正在启动中，请点击"启动服务"按钮，等待1-2分钟后再次尝试。注意：小程序云托管请求超时限制为15秒，请确保后端处理逻辑不超过此限制。',
+            showCancel: false
+          });
+        } else {
+          this.setData({
+            errorMessage: `内网访问失败: ${err.errMsg || JSON.stringify(err)}`,
+            showTroubleshooting: true
+          });
+        }
+      }
+    });
+  },
+
   // 测试POST请求
   testPostRequest() {
     this.setData({ isLoading: true });
@@ -189,6 +244,13 @@ Page({
       .then(result => {
         this.addTestResult('POST请求', `成功: ${JSON.stringify(result)}`);
         this.setData({ isLoading: false });
+        
+        // 显示成功提示
+        wx.showToast({
+          title: 'POST请求成功',
+          icon: 'success',
+          duration: 2000
+        });
       })
       .catch(error => {
         this.addTestResult('POST请求', `失败: ${error.message || JSON.stringify(error)}`);
@@ -196,7 +258,7 @@ Page({
         
         // 显示错误信息和排查建议
         this.setData({
-          errorMessage: '所有请求方式均失败，请检查云托管服务是否正常运行',
+          errorMessage: `POST请求失败: ${error.message || JSON.stringify(error)}`,
           showTroubleshooting: true
         });
       });
@@ -205,25 +267,76 @@ Page({
   // 测试HTTP请求
   testHttpRequest: function() {
     this.addTestResult('测试HTTP请求', '开始');
+    this.setData({ isLoading: true });
     
     // 使用cloudContainer模块发送GET请求
     cloudContainer.get('/api/count')
       .then(result => {
         this.addTestResult('HTTP请求', `成功: ${JSON.stringify(result)}`);
         this.setData({ isLoading: false });
+        
+        // 显示成功提示
+        wx.showToast({
+          title: 'HTTP请求成功',
+          icon: 'success',
+          duration: 2000
+        });
       })
       .catch(error => {
         this.addTestResult('HTTP请求', `失败: ${error.message || JSON.stringify(error)}`);
         this.setData({ isLoading: false });
         
-        // 显示错误信息和排查建议
+        // 显示错误信息
         this.setData({
-          errorMessage: '所有请求方式均失败，请检查云托管服务是否正常运行',
+          errorMessage: `HTTP请求失败: ${error.message || JSON.stringify(error)}`,
           showTroubleshooting: true
         });
       });
   },
   
+  // 测试请求大小限制
+  testRequestSizeLimit() {
+    this.addTestResult('测试请求大小限制', '开始');
+    this.setData({ isLoading: true });
+    
+    // 创建一个大于100K的请求数据
+    const largeData = {
+      largeString: 'A'.repeat(101 * 1024) // 101KB的字符串
+    };
+    
+    // 使用cloudContainer模块发送POST请求
+    cloudContainer.post('/api/count', largeData)
+      .then(result => {
+        this.addTestResult('大数据请求', `成功: ${JSON.stringify(result)}`);
+        this.setData({ isLoading: false });
+        
+        // 显示成功提示
+        wx.showToast({
+          title: '大数据请求成功',
+          icon: 'success',
+          duration: 2000
+        });
+      })
+      .catch(error => {
+        this.addTestResult('大数据请求', `失败: ${error.message || JSON.stringify(error)}`);
+        this.setData({ isLoading: false });
+        
+        // 显示错误信息
+        if (error.code === 'REQUEST_TOO_LARGE') {
+          wx.showModal({
+            title: '请求数据过大',
+            content: '云托管请求大小限制为100K，请减小请求数据大小或使用对象存储处理大文件。',
+            showCancel: false
+          });
+        } else {
+          this.setData({
+            errorMessage: `大数据请求失败: ${error.message || JSON.stringify(error)}`,
+            showTroubleshooting: true
+          });
+        }
+      });
+  },
+
   // 清空测试结果
   clearResults() {
     this.setData({
@@ -235,35 +348,40 @@ Page({
   
   // 添加测试结果
   addTestResult(title, content) {
-    // 获取当前时间
-    const now = new Date();
-    const timeString = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
-    
+    const timestamp = new Date().toLocaleTimeString();
     const newResult = {
-      title,
-      content,
-      time: timeString
+      id: Date.now(),
+      title: title,
+      content: content,
+      timestamp: timestamp
     };
     
+    // 添加到结果列表
+    const testResults = this.data.testResults;
+    testResults.unshift(newResult);
+    
     this.setData({
-      testResults: [newResult, ...this.data.testResults]
+      testResults: testResults
     });
   },
   
   // 复制配置信息
   copyConfig() {
-    const configInfo = JSON.stringify({
-      cloudEnv: this.data.cloudEnv,
-      serviceName: this.data.serviceName,
-      apiBaseUrl: this.data.apiBaseUrl
-    }, null, 2);
+    const configInfo = `云环境ID: ${this.data.cloudEnv}
+服务名称: ${this.data.serviceName}
+API地址: ${this.data.apiBaseUrl}
+使用云托管: ${this.data.useCloudContainer ? '是' : '否'}
+SDK版本: ${this.data.sdkVersion}
+超时限制: ${this.data.cloudLimits.maxTimeout / 1000}秒
+请求大小限制: ${this.data.cloudLimits.maxRequestSize / 1024}KB`;
     
     wx.setClipboardData({
       data: configInfo,
       success: () => {
         wx.showToast({
           title: '配置已复制',
-          icon: 'success'
+          icon: 'success',
+          duration: 2000
         });
       }
     });
@@ -272,99 +390,132 @@ Page({
   // 直接启动服务
   startService() {
     this.setData({ isLoading: true });
-    this.addTestResult('启动服务', '正在尝试启动云托管服务...');
+    this.addTestResult('启动服务', '开始');
     
-    // 使用cloudContainer模块发送请求来触发服务启动
-    cloudContainer.get('/api/warm-up')
+    // 使用cloudContainer模块发送GET请求
+    cloudContainer.get('/api/count', {}, { timeout: 15000 })
       .then(result => {
-        this.addTestResult('启动服务', `成功: ${JSON.stringify(result)}`);
-        this.setData({ 
-          isLoading: false,
-          errorMessage: '服务已启动，请等待1-2分钟后再次测试云托管调用',
-          showTroubleshooting: false
-        });
+        this.addTestResult('启动服务', '成功');
+        this.setData({ isLoading: false });
         
         // 显示成功提示
-        wx.showToast({
+        wx.showModal({
           title: '服务启动成功',
-          icon: 'success',
-          duration: 2000
+          content: '云托管服务已成功启动，现在可以正常使用云托管功能。',
+          showCancel: false
         });
       })
       .catch(error => {
-        // 如果warm-up接口不存在，尝试使用count接口
-        this.addTestResult('启动服务', `尝试备用方法: ${error.message || JSON.stringify(error)}`);
-        
-        // 使用count接口作为备选
-        this.triggerServiceWithHttp();
+        // 如果是超时错误，可能是服务正在启动中
+        if (error.code === 'CLOUD_TIMEOUT_ERROR') {
+          this.addTestResult('启动服务', '服务正在启动中，请等待1-2分钟');
+          this.setData({ isLoading: false });
+          
+          wx.showModal({
+            title: '服务正在启动',
+            content: '云托管服务正在启动中，请等待1-2分钟后再次尝试。冷启动可能需要一些时间，请耐心等待。',
+            showCancel: false
+          });
+        } else {
+          this.addTestResult('启动服务', `失败: ${error.message || JSON.stringify(error)}`);
+          this.setData({ isLoading: false });
+          
+          // 显示错误信息
+          wx.showModal({
+            title: '服务启动失败',
+            content: `启动云托管服务失败，请检查服务配置。错误信息: ${error.message || JSON.stringify(error)}`,
+            showCancel: false
+          });
+        }
       });
   },
   
   // 使用普通HTTP请求触发服务启动（备用方法）
   triggerServiceWithHttp() {
-    this.addTestResult('备用启动方法', '正在使用HTTP请求触发服务启动...');
+    this.setData({ isLoading: true });
+    this.addTestResult('HTTP触发服务启动', '开始');
     
-    // 使用cloudContainer模块发送请求
-    cloudContainer.get('/api/count')
-      .then(result => {
-        this.addTestResult('备用启动方法', `成功: ${JSON.stringify(result)}`);
-        this.setData({ 
-          isLoading: false,
-          errorMessage: '服务已启动，请等待1-2分钟后再次测试云托管调用',
-          showTroubleshooting: false
-        });
-      })
-      .catch(error => {
-        this.addTestResult('备用启动方法', `失败: ${error.message || JSON.stringify(error)}`);
+    wx.request({
+      url: env.apiBaseUrl + '/api/count',
+      method: 'GET',
+      timeout: 15000,
+      success: (res) => {
+        this.addTestResult('HTTP触发服务启动', '成功');
         this.setData({ isLoading: false });
         
-        // 显示错误信息和排查建议
-        this.setData({
-          errorMessage: '无法启动服务，请检查云托管配置是否正确',
-          showTroubleshooting: true
+        // 显示成功提示
+        wx.showModal({
+          title: '服务启动成功',
+          content: '通过HTTP请求成功触发云托管服务启动，现在可以尝试使用云托管功能。',
+          showCancel: false
         });
-      });
+      },
+      fail: (err) => {
+        // 如果是超时错误，可能是服务正在启动中
+        if (err.errMsg && err.errMsg.includes('timeout')) {
+          this.addTestResult('HTTP触发服务启动', '服务正在启动中，请等待1-2分钟');
+          this.setData({ isLoading: false });
+          
+          wx.showModal({
+            title: '服务正在启动',
+            content: '云托管服务正在启动中，请等待1-2分钟后再次尝试。',
+            showCancel: false
+          });
+        } else {
+          this.addTestResult('HTTP触发服务启动', `失败: ${err.errMsg || JSON.stringify(err)}`);
+          this.setData({ isLoading: false });
+          
+          // 显示错误信息
+          wx.showModal({
+            title: '服务启动失败',
+            content: `通过HTTP请求触发云托管服务启动失败。错误信息: ${err.errMsg || JSON.stringify(err)}`,
+            showCancel: false
+          });
+        }
+      }
+    });
   },
   
   // 自动检测服务状态
   checkServiceStatus() {
-    this.addTestResult('服务状态检测', '正在检测云托管服务状态...');
+    this.addTestResult('自动检测服务状态', '开始');
     
-    // 使用cloudContainer模块检测服务状态
-    cloudContainer.get('/api/health')
+    // 使用cloudContainer模块发送GET请求，设置较短的超时时间
+    cloudContainer.get('/api/count', {}, { timeout: 5000 })
       .then(result => {
-        this.addTestResult('服务状态', `正常: ${JSON.stringify(result)}`);
+        this.addTestResult('服务状态检测', '服务正常运行中');
         
         // 显示成功提示
         wx.showToast({
-          title: '服务运行正常',
+          title: '服务正常运行',
           icon: 'success',
           duration: 2000
         });
       })
       .catch(error => {
-        // 检查错误类型
-        if (error.errCode === -504000 || (error.message && error.message.includes('timeout'))) {
-          // 超时错误，可能是服务未启动
-          this.addTestResult('服务状态', '服务未启动或正在启动中');
-          this.setData({
-            errorMessage: '服务未启动或正在启动中，请点击"启动服务"按钮',
-            showTroubleshooting: true
+        // 如果是超时错误，可能是服务未启动
+        if (error.code === 'CLOUD_TIMEOUT_ERROR') {
+          this.addTestResult('服务状态检测', '服务可能未启动或正在启动中');
+          
+          wx.showModal({
+            title: '服务未启动',
+            content: '云托管服务可能未启动或正在启动中，请点击"启动服务"按钮，等待1-2分钟后再次尝试。',
+            confirmText: '启动服务',
+            success: (res) => {
+              if (res.confirm) {
+                this.startService();
+              }
+            }
           });
-        } else if (error.errCode === -501000 || (error.message && error.message.includes('Invalid host'))) {
-          // 环境ID错误
-          this.addTestResult('服务状态', '云环境ID格式错误');
+        } else if (error.code === 'CLOUD_CONTAINER_ERROR' && error.originalError && error.originalError.errMsg && error.originalError.errMsg.includes('invalid host')) {
+          this.addTestResult('服务状态检测', '云环境ID配置错误');
+          
           this.setData({
-            errorMessage: `云环境ID格式错误: ${this.data.cloudEnv}，请检查配置`,
+            errorMessage: '云环境ID格式错误，请检查env.js中的cloudEnv配置',
             showTroubleshooting: true
           });
         } else {
-          // 其他错误
-          this.addTestResult('服务状态', `异常: ${error.message || JSON.stringify(error)}`);
-          this.setData({
-            errorMessage: '云托管服务异常，请检查配置',
-            showTroubleshooting: true
-          });
+          this.addTestResult('服务状态检测', `检测失败: ${error.message || JSON.stringify(error)}`);
         }
       });
   }

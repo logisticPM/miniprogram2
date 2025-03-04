@@ -19,12 +19,24 @@
       <text class="value">{{apiBaseUrl}}</text>
     </view>
     <view class="info-item">
+      <text class="label">内网地址:</text>
+      <text class="value">{{internalApiBaseUrl}}</text>
+    </view>
+    <view class="info-item">
       <text class="label">使用云容器:</text>
-      <text class="value">{{useCloudContainer}}</text>
+      <text class="value">{{useCloudContainer ? '是' : '否'}}</text>
     </view>
     <view class="info-item">
       <text class="label">SDK版本:</text>
       <text class="value">{{sdkVersion}}</text>
+    </view>
+    <view class="info-item">
+      <text class="label">超时限制:</text>
+      <text class="value">{{cloudLimits.maxTimeout / 1000}}秒</text>
+    </view>
+    <view class="info-item">
+      <text class="label">请求大小限制:</text>
+      <text class="value">{{cloudLimits.maxRequestSize / 1024}}KB</text>
     </view>
     <button class="btn" bindtap="copyConfig">复制配置信息</button>
   </view>
@@ -34,9 +46,39 @@
     <view class="btn-group">
       <button class="btn" bindtap="testCloudInit">测试云环境初始化</button>
       <button class="btn" bindtap="testCloudCall">测试云托管调用</button>
+      <button class="btn primary" bindtap="testInternalAccess">测试内网访问</button>
       <button class="btn" bindtap="testHttpRequest">测试HTTP请求</button>
+      <button class="btn" bindtap="testRequestSizeLimit">测试请求大小限制</button>
       <button class="btn primary" bindtap="startService">启动服务</button>
       <button class="btn" bindtap="clearResults">清空结果</button>
+    </view>
+  </view>
+  
+  <view class="section">
+    <view class="section-title">云托管使用限制</view>
+    <view class="guide-content">
+      <view class="guide-item">
+        <text class="guide-title">1. 请求超时限制</text>
+        <text class="guide-desc">• 小程序/公众号中CallContainer超时时间不得超过15秒</text>
+        <text class="guide-desc">• 需控制后端处理耗时，避免超时错误</text>
+        <text class="guide-desc">• 对于耗时操作，考虑异步处理或分批处理</text>
+      </view>
+      <view class="guide-item">
+        <text class="guide-title">2. 请求大小限制</text>
+        <text class="guide-desc">• CallContainer请求大小限制为100K</text>
+        <text class="guide-desc">• 请求中不建议包含图片，应通过对象存储处理</text>
+        <text class="guide-desc">• 大文件传输应使用云存储或分块上传</text>
+      </view>
+      <view class="guide-item">
+        <text class="guide-title">3. 实例扩缩容管理</text>
+        <text class="guide-desc">• 最小副本为0时，半小时无请求服务将缩容到0</text>
+        <text class="guide-desc">• 服务冷启动耗时取决于服务启动速度</text>
+        <text class="guide-desc">• 要避免冷启动影响，可将最小副本数设为1</text>
+      </view>
+      <view class="guide-item">
+        <text class="guide-title">4. 内网访问</text>
+        <text class="guide-desc">• 如仅在小程序/公众号中使用CallContainer，可关闭公网访问，提高安全性</text>
+      </view>
     </view>
   </view>
   
@@ -67,9 +109,12 @@
   <view class="section">
     <view class="section-title">测试结果</view>
     <scroll-view scroll-y="true" class="result-container">
-      <block wx:for="{{testResults}}" wx:key="index">
+      <block wx:for="{{testResults}}" wx:key="id">
         <view class="result-item">
-          <view class="result-title">{{item.title}}</view>
+          <view class="result-header">
+            <text class="result-title">{{item.title}}</text>
+            <text class="result-time">{{item.timestamp}}</text>
+          </view>
           <view class="result-content">{{item.content}}</view>
         </view>
       </block>
