@@ -40,7 +40,7 @@ const initCloud = async () => {
 
     // 创建云实例
     cloudInstance = new wx.cloud.Cloud({
-      resourceAppid: '', // 如果是跨账号调用，这里填写环境所属账号的AppID
+      resourceAppid: 'wxede451d72eb0429a', // 添加小程序AppID
       resourceEnv: env.cloudEnv, // 微信云托管的环境ID
     });
 
@@ -94,6 +94,8 @@ const callContainer = async (options) => {
       header: {
         'X-WX-SERVICE': env.serviceName, // 服务名称
         'content-type': 'application/json',
+        // 排除不需要的用户凭证信息，提高性能
+        'X-WX-EXCLUDE-CREDENTIALS': 'unionid, cloudbase-access-token',
         ...headers // 合并自定义请求头
       }
     };
@@ -124,8 +126,74 @@ const callContainer = async (options) => {
         fail: (error) => {
           debugLog(`云托管调用失败: ${method} ${requestPath}`, error);
           
-          // 检查是否是 PathSet 相关错误
-          if (error && error.errMsg && error.errMsg.includes('PathSet')) {
+          // 检查是否是 Invalid host 相关错误
+          if (error && error.errMsg && (error.errMsg.includes('invalid host') || error.errMsg.includes('Invalid host'))) {
+            debugLog('检测到 Invalid host 错误，可能是云环境ID格式问题');
+            
+            // 尝试修复环境ID格式问题
+            let fixedEnv = env.cloudEnv;
+            // 如果环境ID不包含prod-前缀，尝试添加
+            if (!fixedEnv.startsWith('prod-')) {
+              fixedEnv = `prod-${fixedEnv}`;
+              debugLog('尝试使用修正后的环境ID', fixedEnv);
+              
+              // 使用修正后的环境ID重试
+              cloudInstance.callContainer({
+                ...requestOptions,
+                config: {
+                  env: fixedEnv,
+                },
+                success: (result) => {
+                  debugLog(`使用修正环境ID调用成功: ${method} ${requestPath}`, {
+                    status: result.statusCode,
+                    callId: result.callID || 'unknown'
+                  });
+                  resolve(result.data);
+                },
+                fail: (retryError) => {
+                  debugLog('使用修正环境ID仍然失败', retryError);
+                  
+                  // 如果仍然失败，尝试使用备选方法：直接通过 HTTP 请求
+                  wx.request({
+                    url: `${env.apiBaseUrl}${requestPath}`,
+                    method: method,
+                    data: data,
+                    header: {
+                      'content-type': 'application/json',
+                      ...headers
+                    },
+                    success: (res) => {
+                      debugLog('使用HTTP请求成功', res);
+                      resolve(res.data);
+                    },
+                    fail: (httpError) => {
+                      debugLog('所有尝试均失败', httpError);
+                      reject(httpError);
+                    }
+                  });
+                }
+              });
+            } else {
+              // 如果已经包含prod-前缀但仍然失败，尝试使用HTTP请求
+              wx.request({
+                url: `${env.apiBaseUrl}${requestPath}`,
+                method: method,
+                data: data,
+                header: {
+                  'content-type': 'application/json',
+                  ...headers
+                },
+                success: (res) => {
+                  debugLog('使用HTTP请求成功', res);
+                  resolve(res.data);
+                },
+                fail: (httpError) => {
+                  debugLog('所有尝试均失败', httpError);
+                  reject(httpError);
+                }
+              });
+            }
+          } else if (error && error.errMsg && error.errMsg.includes('PathSet')) {
             debugLog('检测到 PathSet 错误，尝试使用备选方法');
             
             // 使用备选方法：直接通过 HTTP 请求
