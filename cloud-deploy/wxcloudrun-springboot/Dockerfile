@@ -1,9 +1,9 @@
 # 微信云托管优化Dockerfile
 # 更新日期: 2025-03-04
-# 版本: 1.3.0 - 优化构建效率，使用公开可访问的镜像源
+# 版本: 1.3.1 - 使用非Alpine版本的基础镜像
 
 # 第一阶段：构建阶段
-FROM openjdk:17-jdk-alpine AS builder
+FROM openjdk:17 AS builder
 
 # 指定工作目录
 WORKDIR /build
@@ -25,7 +25,7 @@ RUN mkdir -p /root/.m2 \
     </settings>' > /root/.m2/settings.xml
 
 # 安装Maven并清理缓存（合并命令减少层数）
-RUN apk add --no-cache maven && rm -rf /var/cache/apk/*
+RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
 
 # 只复制pom.xml进行依赖下载，利用Docker缓存机制
 COPY pom.xml /build/
@@ -46,7 +46,7 @@ RUN mkdir -p /build/static && \
     echo '{"status":"UP"}' > /build/static/health.json
 
 # 第二阶段：运行阶段
-FROM openjdk:17-jre-alpine
+FROM openjdk:17
 
 # 指定工作目录
 WORKDIR /app
@@ -58,11 +58,11 @@ COPY --from=builder /build/target/*.jar /app/app.jar
 COPY --from=builder /build/static/health.json /app/health.json
 
 # 安装必要工具并设置时区（合并命令减少层数）
-RUN apk add --no-cache tzdata curl netcat-openbsd procps bash \
+RUN apt-get update && apt-get install -y tzdata curl netcat-openbsd procps bash \
     && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo "Asia/Shanghai" > /etc/timezone \
     && mkdir -p /app/logs \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/lib/apt/lists/*
 
 # 创建微信云托管所需的cert目录和初始化脚本
 RUN mkdir -p /app/cert && \
