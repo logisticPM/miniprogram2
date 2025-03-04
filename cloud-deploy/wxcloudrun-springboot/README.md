@@ -9,6 +9,11 @@
 
 ## 更新日志
 
+### 2025-03-04 13:55 更新
+- 添加Docker buildkit相关问题的故障排除指南
+- 完善镜像构建和健康检查问题的解决方案
+- 整理常见问题和解决方法到TROUBLESHOOTING.md
+
 ### 2025-03-04 13:50 更新
 - 集成阿里云Docker Registry，解决镜像拉取失败问题
 - 添加镜像仓库配置文档
@@ -137,6 +142,7 @@
 ├── DEPLOYMENT.md                   部署指南文档
 ├── check-cloud-config.sh           云托管配置检查脚本
 ├── docker-registry-config.md       阿里云Docker Registry配置文档
+├── TROUBLESHOOTING.md              故障排除指南文档
 └── src                             源码目录
     └── main                        源码主目录
         ├── java                    业务逻辑目录
