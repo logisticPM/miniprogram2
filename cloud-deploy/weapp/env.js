@@ -9,8 +9,8 @@ const ENV_TYPE = 'production';
 // 各环境配置
 const ENV_CONFIG = {
   development: {
-    // 云环境ID - 使用MEMORIES中提到的ID
-    cloudEnv: '0d1hHa0w390gu43Oq0w3A1CXs1hHa0Z',
+    // 云环境ID - 不要包含特殊字符
+    cloudEnv: 'prod-0d1hHa0w',
     // 云托管服务名称
     serviceName: 'wxcloudrun-springboot',
     // API基础URL - 仅用于本地开发测试，生产环境使用云托管内网访问
@@ -27,8 +27,8 @@ const ENV_CONFIG = {
     useCloudContainer: false
   },
   production: {
-    // 云环境ID - 使用MEMORIES中提到的ID
-    cloudEnv: '0d1hHa0w390gu43Oq0w3A1CXs1hHa0Z',
+    // 云环境ID - 不要包含特殊字符，使用微信云托管控制台显示的正确格式
+    cloudEnv: 'prod-0d1hHa0w',
     // 云托管服务名称
     serviceName: 'springboot',
     // 内网访问地址（仅在云托管环境内使用）
