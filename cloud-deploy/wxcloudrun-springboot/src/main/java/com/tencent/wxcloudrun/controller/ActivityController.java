@@ -3,6 +3,8 @@ package com.tencent.wxcloudrun.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.tencent.wxcloudrun.config.ApiResponse;
+import com.tencent.wxcloudrun.constants.ActivityStatus;
+import com.tencent.wxcloudrun.constants.RoomStatus;
 import com.tencent.wxcloudrun.dto.ActivityRequest;
 import com.tencent.wxcloudrun.dto.GrabRequest;
 import com.tencent.wxcloudrun.dto.VerifyPasswordRequest;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -27,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 抢房活动控制器
@@ -73,7 +77,7 @@ public class ActivityController {
             activity.setBuildingNumber(request.getBuildingNumber());
             activity.setUnitCount(request.getUnitCount());
             activity.setFloorCount(request.getFloorCount());
-            activity.setStatus("active");
+            activity.setStatus(ActivityStatus.IN_PROGRESS);
             
             Activity createdActivity = activityService.createActivity(activity);
             
@@ -90,7 +94,7 @@ public class ActivityController {
                         // 房间号格式：楼层号+户型，例如：1A
                         room.setRoomNumber(floorNum + houseType);
                         room.setHouseType(houseType);
-                        room.setStatus("available");
+                        room.setStatus(RoomStatus.AVAILABLE);
                         rooms.add(room);
                     }
                 }
@@ -119,6 +123,13 @@ public class ActivityController {
         
         try {
             List<Activity> activities = activityService.getActiveActivities();
+            
+            // 过滤掉已经结束的活动（根据结束时间判断）
+            LocalDateTime now = LocalDateTime.now();
+            activities = activities.stream()
+                .filter(activity -> now.isBefore(activity.getEndTime()))
+                .collect(Collectors.toList());
+                
             return ApiResponse.ok(activities);
         } catch (Exception e) {
             logger.error("获取活动列表失败", e);
@@ -164,7 +175,7 @@ public class ActivityController {
             }
             
             // 验证活动状态
-            if (!"active".equals(activity.get().getStatus())) {
+            if (!ActivityStatus.IN_PROGRESS.equals(activity.get().getStatus())) {
                 return ApiResponse.error("活动已结束");
             }
             
@@ -234,7 +245,7 @@ public class ActivityController {
             }
             
             // 验证活动状态
-            if (!"active".equals(activity.get().getStatus())) {
+            if (!ActivityStatus.IN_PROGRESS.equals(activity.get().getStatus())) {
                 return ApiResponse.error("活动已结束");
             }
             
@@ -255,14 +266,14 @@ public class ActivityController {
             // 验证房间状态
             List<Room> rooms = roomService.getRoomsByIds(request.getRoomIds());
             for (Room room : rooms) {
-                if (!"available".equals(room.getStatus())) {
+                if (!RoomStatus.AVAILABLE.equals(room.getStatus())) {
                     return ApiResponse.error("房间" + room.getRoomNumber() + "已被抢购");
                 }
             }
             
             // 抢房
             int updatedCount = roomService.batchUpdateRoomStatus(
-                request.getRoomIds(), "grabbed", request.getPhoneNumber());
+                request.getRoomIds(), RoomStatus.GRABBED, request.getPhoneNumber());
             
             if (updatedCount != request.getRoomIds().size()) {
                 return ApiResponse.error("部分房间抢购失败，请刷新后重试");
@@ -307,6 +318,80 @@ public class ActivityController {
         } catch (Exception e) {
             logger.error("获取用户抢购记录失败", e);
             return ApiResponse.error("获取用户抢购记录失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取用户抢购记录
+     * @param phoneNumber 手机号
+     * @return API response json
+     */
+    @GetMapping("/user/{phoneNumber}/records")
+    public ApiResponse getUserGrabRecords(@PathVariable String phoneNumber) {
+        logger.info("/api/activity/user/{}/records get request", phoneNumber);
+        
+        List<Map<String, Object>> records = roomService.getUserGrabRecords(phoneNumber);
+        return ApiResponse.ok(records);
+    }
+    
+    /**
+     * 验证活动码
+     * @param activityCode 活动码
+     * @return API response json
+     */
+    @PostMapping("/verify-code")
+    public ApiResponse verifyActivityCode(@RequestBody Map<String, String> requestBody) {
+        String activityCode = requestBody.get("activityCode");
+        logger.info("/api/activity/verify-code post request, activityCode: {}", activityCode);
+        
+        if (activityCode == null || activityCode.trim().isEmpty()) {
+            return ApiResponse.error("活动码不能为空");
+        }
+        
+        try {
+            // 解析活动码，格式为：活动ID-密码
+            String[] parts = activityCode.split("-");
+            if (parts.length != 2) {
+                return ApiResponse.error("无效的活动码格式");
+            }
+            
+            Integer activityId;
+            try {
+                activityId = Integer.parseInt(parts[0]);
+            } catch (NumberFormatException e) {
+                return ApiResponse.error("无效的活动ID");
+            }
+            
+            String password = parts[1];
+            
+            // 查询活动
+            Optional<Activity> activityOpt = activityService.getActivityById(activityId);
+            if (!activityOpt.isPresent()) {
+                return ApiResponse.error("活动不存在");
+            }
+            
+            Activity activity = activityOpt.get();
+            
+            // 验证密码
+            if (!activity.getPassword().equals(password)) {
+                return ApiResponse.error("活动密码错误");
+            }
+            
+            // 验证活动状态
+            if (ActivityStatus.ENDED.equals(activity.getStatus())) {
+                return ApiResponse.error("活动已结束");
+            }
+            
+            // 返回活动信息
+            Map<String, Object> result = new HashMap<>();
+            result.put("id", activity.getId());
+            result.put("title", activity.getTitle());
+            result.put("status", activity.getStatus());
+            
+            return ApiResponse.ok(result);
+        } catch (Exception e) {
+            logger.error("验证活动码出错", e);
+            return ApiResponse.error("验证活动码失败：" + e.getMessage());
         }
     }
 }

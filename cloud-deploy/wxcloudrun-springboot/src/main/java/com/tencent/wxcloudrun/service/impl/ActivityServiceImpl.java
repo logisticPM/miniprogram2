@@ -1,5 +1,6 @@
 package com.tencent.wxcloudrun.service.impl;
 
+import com.tencent.wxcloudrun.constants.ActivityStatus;
 import com.tencent.wxcloudrun.dao.ActivityMapper;
 import com.tencent.wxcloudrun.model.Activity;
 import com.tencent.wxcloudrun.service.ActivityService;
@@ -36,7 +37,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public List<Activity> getActiveActivities() {
-        return activityMapper.getActivitiesByStatus("active");
+        return activityMapper.getActiveActivities(ActivityStatus.IN_PROGRESS);
     }
 
     @Override

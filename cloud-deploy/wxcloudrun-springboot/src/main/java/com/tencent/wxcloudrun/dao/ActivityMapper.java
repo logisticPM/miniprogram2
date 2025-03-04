@@ -38,9 +38,10 @@ public interface ActivityMapper {
 
     /**
      * 获取所有活跃状态的活动
+     * @param status 活动状态
      * @return 活动列表
      */
-    List<Activity> getActiveActivities();
+    List<Activity> getActiveActivities(@Param("status") String status);
 
     /**
      * 更新活动

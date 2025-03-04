@@ -59,7 +59,7 @@
         SELECT id, activityId, buildingNumber, unitNumber, floorNumber, roomNumber, 
                houseType, status, phoneNumber, grabTime, createdAt, updatedAt
         FROM Rooms
-        WHERE activityId = #{activityId} AND status = 'available'
+        WHERE activityId = #{activityId} AND status = #{availableStatus}
         ORDER BY buildingNumber, unitNumber, floorNumber, roomNumber
     </select>
 
@@ -73,17 +73,17 @@
         </foreach>
     </select>
 
-    <update id="updateRoomStatus">
+    <update id="updateRoomStatus" parameterType="map">
         UPDATE Rooms
         SET status = #{status}
         <if test="status == 'grabbed'">
             , phoneNumber = #{phoneNumber}
             , grabTime = NOW()
         </if>
-        WHERE id = #{id} AND status = 'available'
+        WHERE id = #{id} AND status = #{availableStatus}
     </update>
 
-    <update id="batchUpdateRoomStatus">
+    <update id="batchUpdateRoomStatus" parameterType="map">
         UPDATE Rooms
         SET status = #{status}
         <if test="status == 'grabbed'">
@@ -91,10 +91,10 @@
             , grabTime = NOW()
         </if>
         WHERE id IN
-        <foreach collection="roomIds" item="id" open="(" separator="," close=")">
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
-        AND status = 'available'
+        AND status = #{availableStatus}
     </update>
 
     <select id="getRoomsByPhoneNumber" resultMap="roomMapper">
@@ -103,6 +103,56 @@
         FROM Rooms
         WHERE phoneNumber = #{phoneNumber}
         ORDER BY grabTime DESC
+    </select>
+    
+    <select id="getRoomsByBuildingAndFloor" resultMap="roomMapper">
+        SELECT id, activityId, buildingNumber, unitNumber, floorNumber, roomNumber, 
+               houseType, status, phoneNumber, grabTime, createdAt, updatedAt
+        FROM Rooms
+        WHERE activityId = #{activityId} 
+          AND buildingNumber = #{buildingNumber} 
+          AND floorNumber = #{floorNumber}
+        ORDER BY unitNumber, roomNumber
+    </select>
+    
+    <select id="getBuildingNumbersByActivityId" resultType="java.lang.String">
+        SELECT DISTINCT buildingNumber
+        FROM Rooms
+        WHERE activityId = #{activityId}
+        ORDER BY buildingNumber
+    </select>
+    
+    <select id="getFloorsByBuildingNumber" resultType="java.lang.Integer">
+        SELECT DISTINCT floorNumber
+        FROM Rooms
+        WHERE activityId = #{activityId} AND buildingNumber = #{buildingNumber}
+        ORDER BY floorNumber
+    </select>
+    
+    <select id="getUserGrabRecords" resultType="java.util.HashMap">
+        SELECT 
+            r.id AS roomId,
+            r.activityId,
+            r.buildingNumber,
+            r.unitNumber,
+            r.floorNumber,
+            r.roomNumber,
+            r.houseType,
+            r.status,
+            r.grabTime,
+            a.title AS activityTitle,
+            a.description AS activityDescription,
+            a.startTime AS activityStartTime,
+            a.endTime AS activityEndTime,
+            a.status AS activityStatus
+        FROM 
+            Rooms r
+        JOIN 
+            Activities a ON r.activityId = a.id
+        WHERE 
+            r.phoneNumber = #{phoneNumber}
+        ORDER BY 
+            r.grabTime DESC
     </select>
 
 </mapper>

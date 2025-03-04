@@ -18,14 +18,18 @@ public final class ApiResponse {
   }
   
   public static ApiResponse ok() {
-    return new ApiResponse(0, "", new HashMap<>());
+    return new ApiResponse(200, "", new HashMap<>());
   }
 
   public static ApiResponse ok(Object data) {
-    return new ApiResponse(0, "", data);
+    return new ApiResponse(200, "", data);
   }
 
   public static ApiResponse error(String errorMsg) {
-    return new ApiResponse(0, errorMsg, new HashMap<>());
+    return new ApiResponse(500, errorMsg, new HashMap<>());
+  }
+  
+  public static ApiResponse error(int code, String errorMsg) {
+    return new ApiResponse(code, errorMsg, new HashMap<>());
   }
 }

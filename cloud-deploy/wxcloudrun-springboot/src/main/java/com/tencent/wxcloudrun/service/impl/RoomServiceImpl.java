@@ -1,5 +1,6 @@
 package com.tencent.wxcloudrun.service.impl;
 
+import com.tencent.wxcloudrun.constants.RoomStatus;
 import com.tencent.wxcloudrun.dao.RoomMapper;
 import com.tencent.wxcloudrun.model.Room;
 import com.tencent.wxcloudrun.service.RoomService;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -46,7 +48,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public List<Room> getAvailableRoomsByActivityId(Integer activityId) {
-        return roomMapper.getAvailableRoomsByActivityId(activityId);
+        return roomMapper.getAvailableRoomsByActivityId(activityId, RoomStatus.AVAILABLE);
     }
 
     @Override
@@ -59,7 +61,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public boolean updateRoomStatus(Integer id, String status, String phoneNumber) {
-        return roomMapper.updateRoomStatus(id, status, phoneNumber) > 0;
+        return roomMapper.updateRoomStatus(id, status, phoneNumber, RoomStatus.AVAILABLE) > 0;
     }
 
     @Override
@@ -68,11 +70,16 @@ public class RoomServiceImpl implements RoomService {
         if (ids == null || ids.isEmpty()) {
             return 0;
         }
-        return roomMapper.batchUpdateRoomStatus(ids, status, phoneNumber);
+        return roomMapper.batchUpdateRoomStatus(ids, status, phoneNumber, RoomStatus.AVAILABLE);
     }
 
     @Override
     public List<Room> getRoomsByPhoneNumber(String phoneNumber) {
         return roomMapper.getRoomsByPhoneNumber(phoneNumber);
+    }
+    
+    @Override
+    public List<Map<String, Object>> getUserGrabRecords(String phoneNumber) {
+        return roomMapper.getUserGrabRecords(phoneNumber);
     }
 }

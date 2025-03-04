@@ -40,11 +40,11 @@
         ORDER BY createdAt DESC
     </select>
 
-    <select id="getActiveActivities" resultMap="activityMapper">
+    <select id="getActiveActivities" resultMap="activityMapper" parameterType="java.lang.String">
         SELECT id, title, startTime, endTime, password, buildingNumber, 
                unitCount, floorCount, status, createdAt, updatedAt
         FROM Activities
-        WHERE status = 'active'
+        WHERE status = #{status}
         ORDER BY createdAt DESC
     </select>
 

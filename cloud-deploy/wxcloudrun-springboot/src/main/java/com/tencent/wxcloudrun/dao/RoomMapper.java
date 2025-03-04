@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface RoomMapper {
@@ -39,9 +40,12 @@ public interface RoomMapper {
     /**
      * 根据活动ID获取可用房间列表
      * @param activityId 活动ID
+     * @param availableStatus 可用状态
      * @return 可用房间列表
      */
-    List<Room> getAvailableRoomsByActivityId(@Param("activityId") Integer activityId);
+    List<Room> getAvailableRoomsByActivityId(
+            @Param("activityId") Integer activityId,
+            @Param("availableStatus") String availableStatus);
 
     /**
      * 根据ID列表获取房间列表
@@ -73,24 +77,28 @@ public interface RoomMapper {
      * @param id 房间ID
      * @param status 状态
      * @param phoneNumber 手机号
+     * @param availableStatus 可用状态
      * @return 更新的行数
      */
     int updateRoomStatus(
             @Param("id") Integer id,
             @Param("status") String status,
-            @Param("phoneNumber") String phoneNumber);
+            @Param("phoneNumber") String phoneNumber,
+            @Param("availableStatus") String availableStatus);
 
     /**
      * 批量更新房间状态
      * @param ids 房间ID列表
      * @param status 状态
      * @param phoneNumber 手机号
+     * @param availableStatus 可用状态
      * @return 更新的行数
      */
     int batchUpdateRoomStatus(
             @Param("ids") List<Integer> ids,
             @Param("status") String status,
-            @Param("phoneNumber") String phoneNumber);
+            @Param("phoneNumber") String phoneNumber,
+            @Param("availableStatus") String availableStatus);
 
     /**
      * 根据手机号获取房间列表
@@ -125,4 +133,11 @@ public interface RoomMapper {
     List<Integer> getFloorsByBuildingNumber(
             @Param("activityId") Integer activityId,
             @Param("buildingNumber") String buildingNumber);
+
+    /**
+     * 获取用户的抢房记录（包含活动信息）
+     * @param phoneNumber 手机号
+     * @return 抢房记录列表
+     */
+    List<Map<String, Object>> getUserGrabRecords(@Param("phoneNumber") String phoneNumber);
 }

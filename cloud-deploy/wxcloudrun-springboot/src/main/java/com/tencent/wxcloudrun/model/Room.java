@@ -13,7 +13,7 @@ public class Room {
     private Integer floorNumber;
     private String roomNumber;
     private String houseType;
-    private String status; // available, sold
+    private String status; // 待售(available), 已占(grabbed), 已售(sold)
     private String phoneNumber; // 抢购者手机号
     private LocalDateTime grabTime; // 抢购时间
     private LocalDateTime createdAt;

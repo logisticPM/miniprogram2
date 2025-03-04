@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tencent.wxcloudrun.dao.UserMapper">
+
+    <resultMap id="UserMap" type="com.tencent.wxcloudrun.model.User">
+        <id property="id" column="id"/>
+        <result property="phoneNumber" column="phone_number"/>
+        <result property="openId" column="open_id"/>
+        <result property="unionId" column="union_id"/>
+        <result property="nickname" column="nickname"/>
+        <result property="avatarUrl" column="avatar_url"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <sql id="userColumns">
+        id, phone_number, open_id, union_id, nickname, avatar_url, create_time, update_time
+    </sql>
+
+    <!-- 根据ID获取用户 -->
+    <select id="getById" resultMap="UserMap">
+        SELECT
+        <include refid="userColumns"/>
+        FROM Users
+        WHERE id = #{id}
+    </select>
+
+    <!-- 根据手机号获取用户 -->
+    <select id="getByPhoneNumber" resultMap="UserMap">
+        SELECT
+        <include refid="userColumns"/>
+        FROM Users
+        WHERE phone_number = #{phoneNumber}
+    </select>
+
+    <!-- 插入用户 -->
+    <insert id="insert" parameterType="com.tencent.wxcloudrun.model.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO Users (
+            phone_number, open_id, union_id, nickname, avatar_url, create_time, update_time
+        ) VALUES (
+            #{phoneNumber}, #{openId}, #{unionId}, #{nickname}, #{avatarUrl}, #{createTime}, #{updateTime}
+        )
+    </insert>
+
+    <!-- 更新用户 -->
+    <update id="updateById" parameterType="com.tencent.wxcloudrun.model.User">
+        UPDATE Users
+        <set>
+            <if test="phoneNumber != null">phone_number = #{phoneNumber},</if>
+            <if test="openId != null">open_id = #{openId},</if>
+            <if test="unionId != null">union_id = #{unionId},</if>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="avatarUrl != null">avatar_url = #{avatarUrl},</if>
+            update_time = #{updateTime}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+</mapper>

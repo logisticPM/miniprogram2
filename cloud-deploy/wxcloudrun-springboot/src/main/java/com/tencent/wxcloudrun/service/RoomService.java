@@ -3,6 +3,7 @@ package com.tencent.wxcloudrun.service;
 import com.tencent.wxcloudrun.model.Room;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface RoomService {
@@ -73,4 +74,11 @@ public interface RoomService {
      * @return 房间列表
      */
     List<Room> getRoomsByPhoneNumber(String phoneNumber);
+    
+    /**
+     * 获取用户的抢房记录
+     * @param phoneNumber 手机号
+     * @return 抢房记录列表
+     */
+    List<Map<String, Object>> getUserGrabRecords(String phoneNumber);
 }
