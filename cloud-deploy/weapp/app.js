@@ -1,6 +1,8 @@
 // app.js
 const config = require('./config');
 const request = require('./utils/request');
+const cloudContainer = require('./utils/cloud-container');
+const userService = require('./services/user-service');
 
 App({
   onLaunch() {
@@ -21,6 +23,9 @@ App({
           env: config.cloudEnv,
           traceUser: true
         });
+
+        // 初始化云托管环境
+        this.initCloudContainer();
 
         // 输出调试信息
         if (config.env === 'development' && config.enableDebugLog) {
@@ -50,6 +55,9 @@ App({
       });
     }
 
+    // 获取用户信息
+    this.checkLoginStatus();
+
     // 检查基础库版本
     config.checkBaseLibVersion();
 
@@ -65,6 +73,53 @@ App({
         console.error('[ERROR] 微信登录失败:', err);
       }
     })
+  },
+
+  // 初始化云托管环境
+  initCloudContainer() {
+    try {
+      if (config.useCloudContainer) {
+        // 预初始化云托管环境
+        cloudContainer.initCloud().then(() => {
+          console.log('[INFO] 云托管环境初始化成功');
+          
+          // 测试云托管连接
+          if (config.env === 'development' && config.enableDebugLog) {
+            this.testCloudContainerConnection();
+          }
+        }).catch(error => {
+          console.error('[ERROR] 云托管环境初始化失败:', error);
+        });
+      }
+    } catch (error) {
+      console.error('[ERROR] 云托管环境初始化失败:', error);
+    }
+  },
+
+  /**
+   * 封装的微信云托管调用方法
+   * @param {Object} options 业务请求信息
+   * @returns {Promise} 请求结果
+   */
+  call(options) {
+    return cloudContainer.callContainer(options);
+  },
+
+  // 检查用户登录状态
+  checkLoginStatus() {
+    // 从本地存储获取用户信息
+    const userInfo = userService.getUserInfo();
+    if (userInfo) {
+      this.globalData.userInfo = userInfo;
+      
+      if (config.env === 'development' && config.enableDebugLog) {
+        console.log('[DEBUG] 用户已登录:', userInfo);
+      }
+    } else {
+      if (config.env === 'development' && config.enableDebugLog) {
+        console.log('[DEBUG] 用户未登录');
+      }
+    }
   },
 
   // 测试API连接
@@ -132,6 +187,21 @@ App({
             });
         });
     }
+  },
+
+  // 测试云托管连接
+  testCloudContainerConnection() {
+    // 测试健康检查接口
+    const testPath = '/api/health';
+
+    // 使用云托管容器调用
+    cloudContainer.callContainer(testPath, 'GET')
+      .then(res => {
+        console.log('[DEBUG] 云托管连接测试成功:', res);
+      })
+      .catch(err => {
+        console.error('[ERROR] 云托管连接测试失败:', err);
+      });
   },
 
   globalData: {
