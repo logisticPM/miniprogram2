@@ -135,6 +135,93 @@
    <image class="scan-icon" src="/assets/images/scan/icon.png" mode="aspectFit"></image>
    ```
 
+### 6. 请求返回 401 (Unauthorized) 未授权错误
+
+#### 问题描述
+API请求返回401 Unauthorized（未授权）错误，表示后端拒绝访问。
+
+#### 可能原因
+1. 小程序端没有携带必要的登录态或认证信息
+2. 后端启用了严格的鉴权机制，但请求中缺少有效的认证信息
+3. 使用普通HTTP请求而非云托管内网鉴权方式
+4. 认证Token已过期或无效
+5. 用户权限不足，无法访问特定资源
+
+#### 解决方案
+1. **使用微信云托管内网鉴权**：
+   - 确保使用`wx.cloud.callContainer`而不是普通的`wx.request`
+   - 正确配置`env`和`X-WX-SERVICE`头信息
+   - 不要在遇到错误时回退(fallback)到HTTP请求
+
+   ```javascript
+   // 正确的云托管调用示例
+   wx.cloud.callContainer({
+     config: {
+       env: env.cloudEnv  // 确保这是正确的云环境ID
+     },
+     path: '/api/secure-resource',
+     method: 'GET',
+     header: {
+       'X-WX-SERVICE': env.serviceName,  // 确保这是正确的服务名称
+       'content-type': 'application/json'
+     },
+     success: (res) => {
+       // 处理成功响应
+     },
+     fail: (err) => {
+       // 处理错误，但不要回退到HTTP请求
+       console.error('云托管调用失败:', err);
+     }
+   });
+   ```
+
+2. **确保用户已登录**：
+   - 在访问需要认证的API前，确保用户已成功登录
+   - 检查登录状态，必要时引导用户重新登录
+
+   ```javascript
+   // 检查登录状态
+   const checkLogin = () => {
+     const token = wx.getStorageSync('token');
+     if (!token) {
+       wx.navigateTo({
+         url: '/pages/login/login'
+       });
+       return false;
+     }
+     return true;
+   }
+   
+   // 调用API前检查登录状态
+   if (checkLogin()) {
+     callSecureApi();
+   }
+   ```
+
+3. **在请求头中包含认证信息**：
+   - 确保在请求头中包含有效的认证信息（如token）
+   - 检查token格式和有效期
+
+   ```javascript
+   const callSecureApi = () => {
+     const token = wx.getStorageSync('token');
+     
+     cloudContainer.get('/api/secure-resource', {}, {
+       'Authorization': `Bearer ${token}`
+     });
+   }
+   ```
+
+4. **排查后端鉴权逻辑**：
+   - 检查后端日志，了解具体的鉴权失败原因
+   - 确认后端鉴权配置是否正确
+
+5. **使用测试页面验证**：
+   - 使用`pages/test/cloud-test`页面测试API调用
+   - 检查请求头和认证信息是否正确传递
+
+> **重要提示**：在使用微信云托管时，应始终使用`wx.cloud.callContainer`进行API调用，而不是回退到普通HTTP请求。云托管内网鉴权提供了更安全的通信机制。
+
 ## 调试工具
 
 ### 云托管连接测试页面

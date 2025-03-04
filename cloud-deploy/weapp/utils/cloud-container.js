@@ -153,64 +153,45 @@ const callContainer = async (options) => {
                 fail: (retryError) => {
                   debugLog('使用修正环境ID仍然失败', retryError);
                   
-                  // 如果仍然失败，尝试使用备选方法：直接通过 HTTP 请求
-                  wx.request({
-                    url: `${env.apiBaseUrl}${requestPath}`,
-                    method: method,
-                    data: data,
-                    header: {
-                      'content-type': 'application/json',
-                      ...headers
-                    },
-                    success: (res) => {
-                      debugLog('使用HTTP请求成功', res);
-                      resolve(res.data);
-                    },
-                    fail: (httpError) => {
-                      debugLog('所有尝试均失败', httpError);
-                      reject(httpError);
-                    }
+                  // 不再回退到HTTP请求，直接返回错误
+                  wx.showToast({
+                    title: '云托管连接失败',
+                    icon: 'none',
+                    duration: 2000
+                  });
+                  reject({
+                    code: 'CLOUD_CONTAINER_ERROR',
+                    message: '云托管连接失败，请检查网络和配置',
+                    originalError: retryError
                   });
                 }
               });
             } else {
-              // 如果已经包含prod-前缀但仍然失败，尝试使用HTTP请求
-              wx.request({
-                url: `${env.apiBaseUrl}${requestPath}`,
-                method: method,
-                data: data,
-                header: {
-                  'content-type': 'application/json',
-                  ...headers
-                },
-                success: (res) => {
-                  debugLog('使用HTTP请求成功', res);
-                  resolve(res.data);
-                },
-                fail: (httpError) => {
-                  debugLog('所有尝试均失败', httpError);
-                  reject(httpError);
-                }
+              // 如果已经包含prod-前缀但仍然失败，直接返回错误
+              wx.showToast({
+                title: '云托管连接失败',
+                icon: 'none',
+                duration: 2000
+              });
+              reject({
+                code: 'CLOUD_CONTAINER_ERROR',
+                message: '云托管连接失败，请检查网络和配置',
+                originalError: error
               });
             }
           } else if (error && error.errMsg && error.errMsg.includes('PathSet')) {
-            debugLog('检测到 PathSet 错误，尝试使用备选方法');
+            debugLog('检测到 PathSet 错误');
             
-            // 使用备选方法：直接通过 HTTP 请求
-            wx.request({
-              url: `${env.apiBaseUrl}${requestPath}`,
-              method: method,
-              data: data,
-              header: {
-                'content-type': 'application/json',
-                ...headers
-              },
-              success: (res) => {
-                resolve(res.data);
-              },
-              fail: (httpError) => {
-                reject(httpError);
-              }
+            // 不再回退到HTTP请求，直接返回错误
+            wx.showToast({
+              title: '云托管路径错误',
+              icon: 'none',
+              duration: 2000
+            });
+            reject({
+              code: 'CLOUD_PATH_ERROR',
+              message: '云托管路径错误，请检查API路径配置',
+              originalError: error
             });
           } else {
             reject(error);
