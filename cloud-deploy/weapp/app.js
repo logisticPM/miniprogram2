@@ -79,16 +79,19 @@ App({
   initCloudContainer() {
     try {
       if (config.useCloudContainer) {
-        // 预初始化云托管环境
-        cloudContainer.initCloud().then(() => {
-          console.log('[INFO] 云托管环境初始化成功');
+        // 直接初始化微信云环境
+        wx.cloud.init({
+          env: config.cloudEnv,
+          traceUser: true
+        }).then(() => {
+          console.log('[INFO] 云环境初始化成功');
           
           // 测试云托管连接
           if (config.env === 'development' && config.enableDebugLog) {
             this.testCloudContainerConnection();
           }
         }).catch(error => {
-          console.error('[ERROR] 云托管环境初始化失败:', error);
+          console.error('[ERROR] 云环境初始化失败:', error);
         });
       }
     } catch (error) {

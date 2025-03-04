@@ -66,9 +66,6 @@ Page({
     });
 
     try {
-      // 初始化云环境
-      await cloudContainer.initCloud();
-      
       // 调用健康检查接口
       const result = await cloudContainer.get('/api/health');
       
